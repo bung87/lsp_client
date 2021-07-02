@@ -1,7 +1,9 @@
 import lsp_client/lsp_types
-import lsp_client/messages
+include lsp_client/messages
 
 type DocumentUri = string
+type TraceValue = enum
+  off="off",messages="messages",verbose="verbose"
 
 type 
   LspClientObj = object of RootObj
@@ -17,7 +19,7 @@ proc newLspClient*(lspEndpoint:LspEndpoint):LspClient =
   result.lspEndpoint = lspEndpoint
 
 
-proc initialize*(self:LspClient, processId = -1, rootPath:string, rootUri:DocumentUri, initializationOptions, capabilities:ClientCapabilities, trace, workspaceFolders) =
+proc initialize*[T](self:LspClient, processId = -1, rootPath:string, rootUri:DocumentUri, initializationOptions:T, capabilities:ClientCapabilities, trace:TraceValue, workspaceFolders:seq[WorkspaceFolder]) =
     #[
     The initialize request is sent as the first request from the client to the server. If the server receives a request or notification 
     before the initialize request it should act as follows:
@@ -60,7 +62,7 @@ proc shutdown*(self:LspClient) =
   for example to dynamically register capabilities. The initialized notification may only be sent once.
   ]#
   self.lspEndpoint.stop()
-  # return self.lspEndpoint.callMethod("shutdown")
+  return self.lspEndpoint.callMethod("shutdown")
       
        
 proc exit*(self:LspClient) =
