@@ -10,3 +10,4 @@ srcDir        = "src"
 # Dependencies
 
 requires "nim >= 1.4.0"
+requires "https://github.com/cheatfate/asynctools.git"
