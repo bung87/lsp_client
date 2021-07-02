@@ -74,7 +74,7 @@ proc exit*(self:LspClient) =
   self.lspEndpoint.sendNotification("exit")
 
 
-proc didOpen*(self:LspClient, textDocument) =
+proc didOpen*(self:LspClient, textDocument:TextDocumentItem) =
   #[
   The document open notification is sent from the client to the server to signal newly opened text documents. The document's truth is
   now managed by the client and the server must not try to read the document's truth using the document's uri. Open in this sense 
@@ -90,7 +90,7 @@ proc didOpen*(self:LspClient, textDocument) =
   return self.lspEndpoint.sendNotification("textDocument/didOpen", textDocument=textDocument)
     
     
-proc didChange*(self:LspClient, textDocument, contentChanges) = 
+proc didChange*(self:LspClient, textDocument:VersionedTextDocumentIdentifier, contentChanges:seq[TextDocumentContentChangeEvent]) = 
   #[
   The document change notification is sent from the client to the server to signal changes to a text document. 
   In 2.0 the shape of the params has changed to include proper version numbers and language ids.
@@ -102,7 +102,7 @@ proc didChange*(self:LspClient, textDocument, contentChanges) =
   return self.lspEndpoint.sendNotification("textDocument/didChange", textDocument=textDocument, contentChanges=contentChanges)
 
 
-proc documentSymbol*(self:LspClient, textDocument) =
+proc documentSymbol*(self:LspClient, textDocument:TextDocumentItem) =
   #[
   The document symbol request is sent from the client to the server to return a flat list of all symbols found in a given text document. 
   Neither the symbol's location range nor the symbol's container name should be used to infer a hierarchy.
@@ -112,7 +112,7 @@ proc documentSymbol*(self:LspClient, textDocument) =
   # return [lsp_structs.SymbolInformation(**sym) for sym in result_dict]
 
 
-proc definition*(self:LspClient, textDocument, position) =
+proc definition*(self:LspClient, textDocument:TextDocumentItem, position:Position) =
   #[
   The goto definition request is sent from the client to the server to resolve the definition location of a symbol at a given text document position.
   :param TextDocumentItem textDocument: The text document.
@@ -122,7 +122,7 @@ proc definition*(self:LspClient, textDocument, position) =
   # return [lsp_structs.Location(**l) for l in result_dict]
 
 
-proc typeDefinition*(self:LspClient, textDocument, position) =
+proc typeDefinition*(self:LspClient, textDocument:TextDocumentItem, position:Position) =
   #[
   The goto type definition request is sent from the client to the server to resolve the type definition location of a symbol at a given text document position.
   :param TextDocumentItem textDocument: The text document.
@@ -132,7 +132,7 @@ proc typeDefinition*(self:LspClient, textDocument, position) =
   # return [lsp_structs.Location(**l) for l in result_dict]
 
 
-proc signatureHelp*(self:LspClient, textDocument, position) =
+proc signatureHelp*(self:LspClient, textDocument:TextDocumentItem, position:Position) =
   #[
   The signature help request is sent from the client to the server to request signature information at a given cursor position.            
   :param TextDocumentItem textDocument: The text document.
@@ -142,7 +142,7 @@ proc signatureHelp*(self:LspClient, textDocument, position) =
   # return lsp_structs.SignatureHelp(**result_dict)
 
 
-proc completion*(self:LspClient, textDocument, position, context) =
+proc completion*(self:LspClient, textDocument:TextDocumentItem, position:Position, context:CompletionContext) =
   #[
   The signature help request is sent from the client to the server to request signature information at a given cursor position.            
   :param TextDocumentItem textDocument: The text document.
@@ -157,7 +157,7 @@ proc completion*(self:LspClient, textDocument, position, context) =
   # return [lsp_structs.CompletionItem(**l) for l in result_dict]
 
     
-proc declaration*(self:LspClient, textDocument, position) =
+proc declaration*(self:LspClient, textDocument:TextDocumentItem, position:Position) =
   #[
   The go to declaration request is sent from the client to the server to resolve the declaration location of a 
   symbol at a given text document position.
@@ -173,7 +173,7 @@ proc declaration*(self:LspClient, textDocument, position) =
   # return [lsp_structs.Location(**l) if "uri" in l else lsp_structs.LinkLocation(**l) for l in result_dict]
    
 
-proc definition*(self:LspClient, textDocument, position) =
+proc definition*(self:LspClient, textDocument:TextDocumentItem, position:Position) =
   #[
   The go to definition request is sent from the client to the server to resolve the declaration location of a 
   symbol at a given text document position.
