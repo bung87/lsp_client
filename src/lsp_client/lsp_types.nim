@@ -32,7 +32,7 @@ class(LspEndpoint):
   method incId*(){.base.} = inc self.id
   method exitCode*(): int = self.process.peekExitCode
   # method write*(s:string):Future[int] {.async.} = result = await self.output.write(s)
-  method write*(p: pointer, len: int): Future[int] {.base, async.} = 
+  method write*(p: pointer, len: int): Future[int] {.base, async.} =
     result = await self.process.inputHandle.write(p, len)
   method stop*() {.base.} # = discard
   method sendNotification*(noti: string): Future[void]{.base.} # = ""
@@ -42,13 +42,13 @@ class(LspEndpoint):
   method readError*(): Future[string]{.base, async.} =
     while self.err.readable:
       let s = await self.err.readLine()
+      echo s
       result = result & s & "\n"
 
   method readMessage*(): Future[string] {.base, async.} =
     # Note: nimlsp debug build will produce debug info to stdout
     var contentLen = -1
     var headerStarted = false
-
     while self.input.readable:
       let ln = await self.input.readLine()
       debugEcho ln
