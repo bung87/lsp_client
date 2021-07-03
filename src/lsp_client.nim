@@ -16,7 +16,7 @@ type
 proc newLspClient*[E](lspEndpoint: E): LspClient[E] =
   #[
   Constructs a new LspClient instance.
-  :param lspEndpoint: TODO
+  :param lspEndpoint:LspEndpoint
   ]#
   result = LspClient[E]()
   result.lspEndpoint = lspEndpoint
