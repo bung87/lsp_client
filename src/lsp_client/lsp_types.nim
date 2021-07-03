@@ -13,14 +13,15 @@ proc skipWhitespace(x: string, pos: int): int =
     inc result
 type 
   LspEndpointObj = object of RootObj
-    process: AsyncProcess
-    id:int
+    process*: AsyncProcess
+    id*:int
   LspEndpoint* = ref LspEndpointObj
 
 proc start*(self:LspEndpoint) = discard
 proc stop*(self:LspEndpoint)= discard
 proc sendNotification*(self:LspEndpoint,noti:string)= discard
-template callMethod*(self:LspEndpoint)= discard
+proc callMethod*(self: LspEndpoint,`method`:string)
+proc callMethod*[T](self: LspEndpoint,`method`:string,params:T)
 
 proc readMessage*(self:LspEndpoint): Future[string] {.async.}=
   var contentLen = -1

@@ -1,11 +1,12 @@
 import lsp_client/lsp_types
 include lsp_client/messages
 import options
+import asyncdispatch
 
 type DocumentUri = string
-type TraceValue = enum
-  off="off",messages="messages",verbose="verbose"
-
+# type TraceValue = enum
+#   off="off",messages="messages",verbose="verbose"
+type TraceValue = string
 type 
   LspClientObj = object of RootObj
     lspEndpoint:LspEndpoint
@@ -56,14 +57,15 @@ proc initialized*(self:LspClient) =
     self.lspEndpoint.sendNotification("initialized")
 
 
-proc shutdown*(self:LspClient) =
+proc shutdown*(self:LspClient):Future[ResponseMessage] {.multiSync.}=
   #[
   The initialized notification is sent from the client to the server after the client received the result of the initialize request
   but before the client is sending any other request or notification to the server. The server can use the initialized notification
   for example to dynamically register capabilities. The initialized notification may only be sent once.
   ]#
   self.lspEndpoint.stop()
-  return self.lspEndpoint.callMethod("shutdown")
+  let resp = await self.lspEndpoint.callMethod("shutdown")
+  return ResponseMessage(resp.parseJson)
       
        
 proc exit*(self:LspClient) =
