@@ -26,7 +26,7 @@ let resp = waitFor client.initialize(
   trace = none(string),
   workspaceFolders = none(seq[WorkspaceFolder]))
 echo "initialize:\n", resp.JsonNode
-# waitFor client.initialized()
+waitFor client.initialized()
 echo "initialized:\n"
 let resp2 = waitFor client.shutdown()
 echo resp2.JsonNode

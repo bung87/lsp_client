@@ -67,9 +67,8 @@ proc initialized*[E](self: LspClient[E]): Future[void] {.async.} =
 
 proc shutdown*[E](self: LspClient[E]): Future[ResponseMessage] {.async.} =
   #[
-  The initialized notification is sent from the client to the server after the client received the result of the initialize request
-  but before the client is sending any other request or notification to the server. The server can use the initialized notification
-  for example to dynamically register capabilities. The initialized notification may only be sent once.
+   It asks the server to shut down, but to not exit 
+   (otherwise the response might not be delivered correctly to the client)
   ]#
   self.lspEndpoint.stop()
   let resp = await self.lspEndpoint.callMethod("shutdown")
