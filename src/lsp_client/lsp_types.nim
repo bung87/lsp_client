@@ -1,4 +1,4 @@
-import asynctools,asyncdispatch,faststreams/asynctools_adapters, faststreams/textio
+import asynctools, asyncdispatch, faststreams/asynctools_adapters, faststreams/textio
 import strutils, parseutils, json
 
 type
@@ -11,22 +11,23 @@ proc skipWhitespace(x: string, pos: int): int =
   result = pos
   while result < x.len and x[result] in Whitespace:
     inc result
-type 
+type
   LspEndpointObj = object of RootObj
     process*: AsyncProcess
-    id*:int
+    id*: int
   LspEndpoint* = ref LspEndpointObj
 
-proc start*(self:LspEndpoint) = discard
-proc stop*(self:LspEndpoint)= discard
-proc sendNotification*(self:LspEndpoint,noti:string)= discard
-proc callMethod*(self: LspEndpoint,`method`:string)
-proc callMethod*[T](self: LspEndpoint,`method`:string,params:T)
+proc start*(self: LspEndpoint) = discard
+proc stop*(self: LspEndpoint) = discard
+template sendNotification*(self: LspEndpoint, noti: string): string = ""
+template sendNotification*(self: LspEndpoint, `method`: string, params: typed): string = ""
+template callMethod*(self: LspEndpoint, `method`: string): string = ""
+template callMethod*(self: LspEndpoint, `method`: string, params: typed): string = ""
 
-proc readMessage*(self:LspEndpoint): Future[string] {.async.}=
+proc readMessage*(self: LspEndpoint): Future[string] {.async.} =
   var contentLen = -1
   var headerStarted = false
- 
+
   let input = asyncPipeInput(self.process.outputHandle)
   while input.readable:
     let ln = await input.readLine()

@@ -7,12 +7,12 @@ type DocumentUri = string
 # type TraceValue = enum
 #   off="off",messages="messages",verbose="verbose"
 type TraceValue = string
-type 
+type
   LspClientObj = object of RootObj
-    lspEndpoint:LspEndpoint
+    lspEndpoint: LspEndpoint
   LspClient* = ref LspClientObj
 
-proc newLspClient*(lspEndpoint:LspEndpoint):LspClient =
+proc newLspClient*(lspEndpoint: LspEndpoint): LspClient =
   #[
   Constructs a new LspClient instance.
   :param lspEndpoint: TODO
@@ -21,8 +21,10 @@ proc newLspClient*(lspEndpoint:LspEndpoint):LspClient =
   result.lspEndpoint = lspEndpoint
 
 
-proc initialize*[T](self:LspClient, processId: Option[int], rootPath:Option[string], rootUri:DocumentUri, initializationOptions:Option[T], capabilities:ClientCapabilities, trace:Option[TraceValue], workspaceFolders:Option[seq[WorkspaceFolder]]) =
-    #[
+proc initialize*[T](self: LspClient, processId: Option[int], rootPath: Option[string], rootUri: DocumentUri,
+    initializationOptions: Option[T], capabilities: ClientCapabilities, trace: Option[TraceValue],
+    workspaceFolders: Option[seq[WorkspaceFolder]]) =
+  #[
     The initialize request is sent as the first request from the client to the server. If the server receives a request or notification 
     before the initialize request it should act as follows:
     1. For a request the response should be an error with code: -32002. The message can be picked by the server.
@@ -44,40 +46,42 @@ proc initialize*[T](self:LspClient, processId: Option[int], rootPath:Option[stri
     :param list workspaceFolders: The workspace folders configured in the client when the server starts. This property is only available if the client supports workspace folders.
                                     It can be `null` if the client supports workspace folders but none are configured.
     ]#
-    self.lspEndpoint.start()
-    return self.lspEndpoint.callMethod("initialize", InitializeParams.create(processId=processId, rootPath=rootPath, rootUri=rootUri, initializationOptions=initializationOptions, capabilities=capabilities, trace=trace, workspaceFolders=workspaceFolders))
+  self.lspEndpoint.start()
+  return self.lspEndpoint.callMethod("initialize", InitializeParams.create(processId = processId, rootPath = rootPath,
+      rootUri = rootUri, initializationOptions = initializationOptions, capabilities = capabilities, trace = trace,
+      workspaceFolders = workspaceFolders))
 
 
-proc initialized*(self:LspClient) =
-    #[
+proc initialized*(self: LspClient) =
+  #[
     The initialized notification is sent from the client to the server after the client received the result of the initialize request
     but before the client is sending any other request or notification to the server. The server can use the initialized notification
     for example to dynamically register capabilities. The initialized notification may only be sent once.
     ]#
-    self.lspEndpoint.sendNotification("initialized")
+  discard self.lspEndpoint.sendNotification("initialized")
 
 
-proc shutdown*(self:LspClient):Future[ResponseMessage] {.multiSync.}=
+proc shutdown*(self: LspClient): Future[ResponseMessage] {.async.} =
   #[
   The initialized notification is sent from the client to the server after the client received the result of the initialize request
   but before the client is sending any other request or notification to the server. The server can use the initialized notification
   for example to dynamically register capabilities. The initialized notification may only be sent once.
   ]#
   self.lspEndpoint.stop()
-  let resp = await self.lspEndpoint.callMethod("shutdown")
+  let resp = self.lspEndpoint.callMethod("shutdown")
   return ResponseMessage(resp.parseJson)
-      
-       
-proc exit*(self:LspClient) =
+
+
+proc exit*(self: LspClient) =
   #[
   The initialized notification is sent from the client to the server after the client received the result of the initialize request
   but before the client is sending any other request or notification to the server. The server can use the initialized notification
   for example to dynamically register capabilities. The initialized notification may only be sent once.
   ]#
-  self.lspEndpoint.sendNotification("exit")
+  discard self.lspEndpoint.sendNotification("exit")
 
 
-proc didOpen*(self:LspClient, textDocument:TextDocumentItem) =
+proc didOpen*(self: LspClient, textDocument: TextDocumentItem): string =
   #[
   The document open notification is sent from the client to the server to signal newly opened text documents. The document's truth is
   now managed by the client and the server must not try to read the document's truth using the document's uri. Open in this sense 
@@ -90,10 +94,12 @@ proc didOpen*(self:LspClient, textDocument:TextDocumentItem) =
   handles the new language id as well.
   :param TextDocumentItem textDocument: The document that was opened.
   ]#
-  return self.lspEndpoint.sendNotification("textDocument/didOpen", textDocument=textDocument)
-    
-    
-proc didChange*(self:LspClient, textDocument:VersionedTextDocumentIdentifier, contentChanges:seq[TextDocumentContentChangeEvent]) = 
+  return self.lspEndpoint.sendNotification("textDocument/didOpen", DidOpenTextDocumentParams.create(
+      textDocument = textDocument))
+
+
+proc didChange*(self: LspClient, textDocument: VersionedTextDocumentIdentifier, contentChanges: seq[
+    TextDocumentContentChangeEvent]): string =
   #[
   The document change notification is sent from the client to the server to signal changes to a text document. 
   In 2.0 the shape of the params has changed to include proper version numbers and language ids.
@@ -102,65 +108,73 @@ proc didChange*(self:LspClient, textDocument:VersionedTextDocumentIdentifier, co
       to the document. So if there are two content changes c1 and c2 for a document in state S then c1 move the document 
       to S' and c2 to S''.
   ]#
-  return self.lspEndpoint.sendNotification("textDocument/didChange", textDocument=textDocument, contentChanges=contentChanges)
+  return self.lspEndpoint.sendNotification("textDocument/didChange", DidChangeTextDocumentParams.create(
+      textDocument = textDocument, contentChanges = contentChanges))
 
 
-proc documentSymbol*(self:LspClient, textDocument:TextDocumentItem) =
+proc documentSymbol*(self: LspClient, textDocument: TextDocumentIdentifier): string =
   #[
   The document symbol request is sent from the client to the server to return a flat list of all symbols found in a given text document. 
   Neither the symbol's location range nor the symbol's container name should be used to infer a hierarchy.
   :param TextDocumentItem textDocument: The text document.
   ]#
-  return self.lspEndpoint.callMethod("textDocument/documentSymbol", textDocument=textDocument)
+  return self.lspEndpoint.callMethod("textDocument/documentSymbol", DocumentSymbolParams.create(
+      textDocument = textDocument))
   # return [lsp_structs.SymbolInformation(**sym) for sym in result_dict]
 
 
-proc definition*(self:LspClient, textDocument:TextDocumentItem, position:Position) =
+proc definition*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position): string =
   #[
   The goto definition request is sent from the client to the server to resolve the definition location of a symbol at a given text document position.
-  :param TextDocumentItem textDocument: The text document.
+  :param TextDocumentIdentifier textDocument: The text document.
   :param Position position: The position inside the text document.
   ]#
-  return self.lspEndpoint.callMethod("textDocument/definition", textDocument=textDocument, position=position)
+  # TextDocumentPositionParams,WorkDoneProgressParams,PartialResultParams
+  return self.lspEndpoint.callMethod("textDocument/definition", TextDocumentPositionParams.create(
+      textDocument = textDocument, position = position))
   # return [lsp_structs.Location(**l) for l in result_dict]
 
 
-proc typeDefinition*(self:LspClient, textDocument:TextDocumentItem, position:Position) =
+proc typeDefinition*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position): string =
   #[
   The goto type definition request is sent from the client to the server to resolve the type definition location of a symbol at a given text document position.
-  :param TextDocumentItem textDocument: The text document.
+  :param TextDocumentIdentifier textDocument: The text document.
   :param Position position: The position inside the text document.
   ]#
-  return self.lspEndpoint.callMethod("textDocument/definition", textDocument=textDocument, position=position)
+  return self.lspEndpoint.callMethod("textDocument/definition", TextDocumentPositionParams.create(
+      textDocument = textDocument, position = position))
   # return [lsp_structs.Location(**l) for l in result_dict]
 
 
-proc signatureHelp*(self:LspClient, textDocument:TextDocumentItem, position:Position) =
+proc signatureHelp*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position): string =
   #[
   The signature help request is sent from the client to the server to request signature information at a given cursor position.            
-  :param TextDocumentItem textDocument: The text document.
+  :param TextDocumentIdentifier textDocument: The text document.
   :param Position position: The position inside the text document.
   ]#
-  return self.lspEndpoint.callMethod("textDocument/signatureHelp", textDocument=textDocument, position=position)
+  return self.lspEndpoint.callMethod("textDocument/signatureHelp", TextDocumentPositionParams.create(
+      textDocument = textDocument, position = position))
   # return lsp_structs.SignatureHelp(**result_dict)
 
 
-proc completion*(self:LspClient, textDocument:TextDocumentItem, position:Position, context:CompletionContext) =
+proc completion*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position, context: Option[
+    CompletionContext]): string =
   #[
-  The signature help request is sent from the client to the server to request signature information at a given cursor position.            
-  :param TextDocumentItem textDocument: The text document.
+  The Completion request is sent from the client to the server to compute completion items at a given cursor position.
+  :param TextDocumentIdentifier textDocument: The text document.
   :param Position position: The position inside the text document.
   :param CompletionContext context: The completion context. This is only available if the client specifies 
                                       to send this using `ClientCapabilities.textDocument.completion.contextSupport === true`
   ]#
-  return self.lspEndpoint.callMethod("textDocument/completion", textDocument=textDocument, position=position, context=context)
+  return self.lspEndpoint.callMethod("textDocument/completion", CompletionParams.create(textDocument = textDocument,
+      position = position, context = context))
   # if "isIncomplete" in result_dict:
   #     return lsp_structs.CompletionList(**result_dict)
-  
+
   # return [lsp_structs.CompletionItem(**l) for l in result_dict]
 
-    
-proc declaration*(self:LspClient, textDocument:TextDocumentItem, position:Position) =
+
+proc declaration*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position): string =
   #[
   The go to declaration request is sent from the client to the server to resolve the declaration location of a 
   symbol at a given text document position.
@@ -169,23 +183,24 @@ proc declaration*(self:LspClient, textDocument:TextDocumentItem, position:Positi
   :param TextDocumentItem textDocument: The text document.
   :param Position position: The position inside the text document.
   ]#
-  return  self.lspEndpoint.callMethod("textDocument/declaration", textDocument=textDocument, position=position)
+  return self.lspEndpoint.callMethod("textDocument/declaration", TextDocumentPositionParams.create(
+      textDocument = textDocument, position = position))
   # if "uri" in result_dict:
-      # return lsp_structs.Location(**result_dict)
+    # return lsp_structs.Location(**result_dict)
 
   # return [lsp_structs.Location(**l) if "uri" in l else lsp_structs.LinkLocation(**l) for l in result_dict]
-   
 
-proc definition*(self:LspClient, textDocument:TextDocumentItem, position:Position) =
+
+# proc definition*(self:LspClient, textDocument:TextDocumentIdentifier, position:Position):string =
   #[
-  The go to definition request is sent from the client to the server to resolve the declaration location of a 
+  The go to definition request is sent from the client to the server to resolve the declaration location of a
   symbol at a given text document position.
   The result type LocationLink[] got introduce with version 3.14.0 and depends in the corresponding client
   capability `clientCapabilities.textDocument.declaration.linkSupport`.
-  :param TextDocumentItem textDocument: The text document.
+  :param TextDocumentIdentifier textDocument: The text document.
   :param Position position: The position inside the text document.
   ]#
-  return self.lspEndpoint.callMethod("textDocument/definition", textDocument=textDocument, position=position)
+  # return self.lspEndpoint.callMethod("textDocument/definition", TextDocumentPositionParams.create(textDocument=textDocument, position=position))
   # if "uri" in result_dict:
   #     return lsp_structs.Location(**result_dict)
 

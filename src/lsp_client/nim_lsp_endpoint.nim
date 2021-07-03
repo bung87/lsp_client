@@ -9,16 +9,19 @@ type LspNimEndpoint* = ref object of LspEndpoint
 proc start*(self: LspNimEndpoint) =
   self.process = startProcess(findExe("nimlsp"))
 proc stop*(self: LspNimEndpoint) = discard
-proc sendNotification*(self: LspNimEndpoint, noti: string) = discard
 
-proc callMethod*[T](self: LspNimEndpoint,`method`:string,params:T){.multiSync.} = 
-  if not isValid(params,type params):
-    raise newException(ValueError)
+template sendNotification*(self: LspNimEndpoint, noti: string): string = ""
+# template callMethod*(self: LspEndpoint,`method`:string):string = ""
+# template callMethod*(self: LspEndpoint,`method`:string,params:typed):string = ""
+
+proc callMethod*[T](self: LspNimEndpoint, `method`: string, params: T){.multiSync.} =
+  # if not isValid(params,type params):
+  #   raise newException(ValueError)
   let id = self.id
   inc self.id
-  let jo = initGRequest(id=id,`method`= `method`,params=params)
-  
+  let jo = initGRequest(id = id, `method` = `method`, params = params)
+
   let str = % jo
   var msg = "Content-Length: " & $str.len & "\r\n\r\n" & str
-  await self.process.inputHandle.write(msg.addr,msg.len)
+  await self.process.inputHandle.write(msg.addr, msg.len)
   await self.readMessage()
