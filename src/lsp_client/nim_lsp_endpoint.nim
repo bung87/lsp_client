@@ -8,7 +8,7 @@ import oop_utils/standard_class
 class(LspNimEndpoint of LspEndpoint):
   ctor(newLspNimEndpoint)
   method start*() =
-    self.setProcess startProcess(findExe("nimlsp"), options = {poDemon})
+    self.setProcess startProcess(findExe("nimlsp"), options = {})
   method stop*() = discard
 
   method roundtrip*(str: string): Future[string]{.async.} =
