@@ -21,9 +21,9 @@ proc newLspClient*(lspEndpoint: LspEndpoint): LspClient =
   result.lspEndpoint = lspEndpoint
 
 
-proc initialize*[T](self: LspClient, processId: Option[int], rootPath: Option[string], rootUri: DocumentUri,
+proc initialize*[T, P](self: LspClient, processId: P, rootPath: Option[string], rootUri: DocumentUri,
     initializationOptions: Option[T], capabilities: ClientCapabilities, trace: Option[TraceValue],
-    workspaceFolders: Option[seq[WorkspaceFolder]]) =
+    workspaceFolders: Option[seq[WorkspaceFolder]]): string =
   #[
     The initialize request is sent as the first request from the client to the server. If the server receives a request or notification 
     before the initialize request it should act as follows:
@@ -48,7 +48,8 @@ proc initialize*[T](self: LspClient, processId: Option[int], rootPath: Option[st
     ]#
   self.lspEndpoint.start()
   return self.lspEndpoint.callMethod("initialize", InitializeParams.create(processId = processId, rootPath = rootPath,
-      rootUri = rootUri, initializationOptions = initializationOptions, capabilities = capabilities, trace = trace,
+      rootUri = rootUri, initializationOptions = cast[Option[json.JsonNode]](initializationOptions),
+          capabilities = capabilities, trace = trace,
       workspaceFolders = workspaceFolders))
 
 

@@ -4,6 +4,7 @@ import jsonschema
 import json
 import options
 import sequtils
+include ./client_capabilities
 
 jsonSchema:
   Message:
@@ -126,15 +127,15 @@ jsonSchema:
   ExecuteCommandCapability:
     dynamicRegistration ?: bool
 
-  WorkspaceClientCapabilities:
-    applyEdit ?: bool
-    workspaceEdit ?: WorkspaceEditCapability
-    didChangeConfiguration ?: DidChangeConfigurationCapability
-    didChangeWatchedFiles ?: DidChangeWatchedFilesCapability
-    symbol ?: SymbolCapability
-    executeCommand ?: ExecuteCommandCapability
-    workspaceFolders ?: bool
-    configuration ?: bool
+  # WorkspaceClientCapabilities:
+  #   applyEdit ?: bool
+  #   workspaceEdit ?: WorkspaceEditCapability
+  #   didChangeConfiguration ?: DidChangeConfigurationCapability
+  #   didChangeWatchedFiles ?: DidChangeWatchedFilesCapability
+  #   symbol ?: SymbolCapability
+  #   executeCommand ?: ExecuteCommandCapability
+  #   workspaceFolders ?: bool
+  #   configuration ?: bool
 
   SynchronizationCapability:
     dynamicRegistration ?: bool
@@ -214,31 +215,31 @@ jsonSchema:
   PublishDiagnosticsCapability:
     dynamicRegistration ?: bool
 
-  TextDocumentClientCapabilities:
-    synchronization ?: SynchronizationCapability
-    completion ?: CompletionCapability
-    hover ?: HoverCapability
-    signatureHelp ?: SignatureHelpCapability
-    references ?: ReferencesCapability
-    documentHighlight ?: DocumentHighlightCapability
-    documentSymbol ?: DocumentSymbolCapability
-    formatting ?: FormattingCapability
-    rangeFormatting ?: RangeFormattingCapability
-    onTypeFormatting ?: OnTypeFormattingCapability
-    definition ?: DefinitionCapability
-    typeDefinition ?: TypeDefinitionCapability
-    implementation ?: ImplementationCapability
-    codeAction ?: CodeActionCapability
-    codeLens ?: CodeLensCapability
-    documentLink ?: DocumentLinkCapability
-    colorProvider ?: ColorProviderCapability
-    rename ?: RenameCapability
-    publishDiagnostics ?: PublishDiagnosticsCapability
+  # TextDocumentClientCapabilities:
+  #   synchronization ?: SynchronizationCapability
+  #   completion ?: CompletionCapability
+  #   hover ?: HoverCapability
+  #   signatureHelp ?: SignatureHelpCapability
+  #   references ?: ReferencesCapability
+  #   documentHighlight ?: DocumentHighlightCapability
+  #   documentSymbol ?: DocumentSymbolCapability
+  #   formatting ?: FormattingCapability
+  #   rangeFormatting ?: RangeFormattingCapability
+  #   onTypeFormatting ?: OnTypeFormattingCapability
+  #   definition ?: DefinitionCapability
+  #   typeDefinition ?: TypeDefinitionCapability
+  #   implementation ?: ImplementationCapability
+  #   codeAction ?: CodeActionCapability
+  #   codeLens ?: CodeLensCapability
+  #   documentLink ?: DocumentLinkCapability
+  #   colorProvider ?: ColorProviderCapability
+  #   rename ?: RenameCapability
+  #   publishDiagnostics ?: PublishDiagnosticsCapability
 
-  ClientCapabilities:
-    workspace ?: WorkspaceClientCapabilities
-    textDocument ?: TextDocumentClientCapabilities
-    experimental ?: any
+  # ClientCapabilities:
+  #   workspace ?: WorkspaceClientCapabilities
+  #   textDocument ?: TextDocumentClientCapabilities
+  #   experimental ?: any
 
   WorkspaceFolder:
     uri: string
@@ -488,9 +489,9 @@ jsonSchema:
     documentation ?: string or MarkupContent
     parameters ?: ParameterInformation[]
 
-  ParameterInformation:
-    label: string
-    documentation ?: string or MarkupContent
+  # ParameterInformation:
+  #   label: string
+  #   documentation ?: string or MarkupContent
 
   SignatureHelpRegistrationOptions extends TextDocumentRegistrationOptions:
     triggerCharacters ?: string[]
