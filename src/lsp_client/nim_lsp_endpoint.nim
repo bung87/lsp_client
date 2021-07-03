@@ -28,7 +28,7 @@ class(LspNimEndpoint of LspEndpoint):
 
     let written = await self.write(msg[0].addr, msg.len)
     doAssert written == msg.len
-    echo await self.readError()
+    # echo await self.readError()
 
   method sendNotification*(`method`: string): Future[void]{.async.} =
     let id = self.getId()

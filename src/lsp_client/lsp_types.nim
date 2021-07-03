@@ -1,5 +1,5 @@
 import asynctools, asyncdispatch, faststreams/asynctools_adapters, faststreams/textio
-import strutils, parseutils, json
+import strutils, parseutils
 import oop_utils/standard_class
 
 type
@@ -23,26 +23,26 @@ class(LspEndpoint):
       err = default(AsyncInputStream)
 
   method start*() {.base.} # = discard
-  method setProcess*(p: AsyncProcess) =
+  method setProcess*(p: AsyncProcess) {.base.} =
     self.process = p
     self.input = asyncPipeInput(self.process.outputHandle)
     self.output = asyncPipeOutput(self.process.inputHandle)
     self.err = asyncPipeInput(self.process.errorHandle)
-  method getId*(): int = self.id
-  method incId*() = inc self.id
+  method getId*(): int{.base.} = self.id
+  method incId*(){.base.} = inc self.id
   # method write*(s:string):Future[int] {.async.} = result = await self.output.write(s)
-  method write*(p: pointer, len: int): Future[int] {.async.} = result = await self.process.inputHandle.write(p, len)
+  method write*(p: pointer, len: int): Future[int] {.base, async.} = result = await self.process.inputHandle.write(p, len)
   method stop*() {.base.} # = discard
   method sendNotification*(noti: string): Future[void]{.base.} # = ""
   method sendNotification*[T](`method`: string, params: T): Future[void]{.base.} # = ""
   method callMethod*(`method`: string): Future[string] {.base.} # = ""
   method callMethod*[T](`method`: string, params: T): Future[string] {.base.} #= ""
-  method readError*(): Future[string]{.async.} =
+  method readError*(): Future[string]{.base, async.} =
     while self.err.readable:
       let s = await self.err.readLine()
       result = result & s & "\n"
 
-  method readMessage*(): Future[string] {.async.} =
+  method readMessage*(): Future[string] {.base, async.} =
     # Note: nimlsp debug build will produce debug info to stdout
     var contentLen = -1
     var headerStarted = false
@@ -76,7 +76,6 @@ class(LspEndpoint):
         if contentLen != -1:
           let s = `@`(self.input.read(contentLen))
           result = cast[string](s)
-          echo result
           when defined(debugCommunication):
             stderr.write(result)
             stderr.write("\n")
