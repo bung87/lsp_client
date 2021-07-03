@@ -2,6 +2,7 @@ import lsp_client/lsp_types
 include lsp_client/messages
 import options
 import asyncdispatch
+import std/jsonutils
 
 type DocumentUri = string
 # type TraceValue = enum

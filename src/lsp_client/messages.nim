@@ -104,7 +104,7 @@ jsonSchema:
     rootPath ?: string or nil
     rootUri: string or nil # String is DocumentUri
     initializationOptions ?: any
-    capabilities: ClientCapabilities
+    capabilities: ClientCapabilities or JsonNode
     trace ?: string # 'off' or 'messages' or 'verbose'
     workspaceFolders ?: WorkspaceFolder[] or nil
 
