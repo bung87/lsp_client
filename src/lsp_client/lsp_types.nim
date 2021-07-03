@@ -33,8 +33,8 @@ class(LspEndpoint):
   # method write*(s:string):Future[int] {.async.} = result = await self.output.write(s)
   method write*(p: pointer, len: int): Future[int] {.async.} = result = await self.process.inputHandle.write(p, len)
   method stop*() {.base.} # = discard
-  method sendNotification*(noti: string): Future[string]{.base.} # = ""
-  method sendNotification*[T](`method`: string, params: T): Future[string]{.base.} # = ""
+  method sendNotification*(noti: string): Future[void]{.base.} # = ""
+  method sendNotification*[T](`method`: string, params: T): Future[void]{.base.} # = ""
   method callMethod*(`method`: string): Future[string] {.base.} # = ""
   method callMethod*[T](`method`: string, params: T): Future[string] {.base.} #= ""
   method readError*(): Future[string]{.async.} =

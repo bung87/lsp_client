@@ -17,7 +17,7 @@ let caps = create(ClientCapabilities,
         window = none(WindowClientCapabilities),
         experimental = none(JsonNode))
 
-echo "initialize:\n", waitFor client.initialize(
+let resp = waitFor client.initialize(
       initializationOptions = some(create(ClientInfo, name = "moe", version = some("0.2.0"))),
       processId = getCurrentProcessId(),
       rootPath = none(string),
@@ -25,4 +25,9 @@ echo "initialize:\n", waitFor client.initialize(
       capabilities = caps,
   trace = none(string),
   workspaceFolders = none(seq[WorkspaceFolder]))
-echo "initialized:\n", waitFor client.initialized()
+echo "initialize:\n", resp.JsonNode
+# waitFor client.initialized()
+echo "initialized:\n"
+let resp2 = waitFor client.shutdown()
+echo resp2.JsonNode
+waitFor client.exit()

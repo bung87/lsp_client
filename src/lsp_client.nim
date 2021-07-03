@@ -24,7 +24,7 @@ proc newLspClient*[E](lspEndpoint: E): LspClient[E] =
 
 proc initialize*[E, T, P](self: LspClient[E], processId: P, rootPath: Option[string], rootUri: DocumentUri,
     initializationOptions: Option[T], capabilities: ClientCapabilities, trace: Option[TraceValue],
-    workspaceFolders: Option[seq[WorkspaceFolder]]): Future[string]{.async.} =
+    workspaceFolders: Option[seq[WorkspaceFolder]]): Future[InitializeResult]{.async.} =
   #[
     The initialize request is sent as the first request from the client to the server. If the server receives a request or notification 
     before the initialize request it should act as follows:
@@ -48,22 +48,24 @@ proc initialize*[E, T, P](self: LspClient[E], processId: P, rootPath: Option[str
                                     It can be `null` if the client supports workspace folders but none are configured.
     ]#
   self.lspEndpoint.start()
-  return await self.lspEndpoint.callMethod("initialize", InitializeParams.create(processId = processId,
+
+  let resp = await self.lspEndpoint.callMethod("initialize", InitializeParams.create(processId = processId,
       rootPath = rootPath, rootUri = rootUri, initializationOptions = cast[Option[json.JsonNode]](
           initializationOptions), capabilities = capabilities, trace = trace,
       workspaceFolders = workspaceFolders))
+  result = InitializeResult(resp.toJson)
 
 
-proc initialized*[E](self: LspClient[E]): Future[string] {.async.} =
+proc initialized*[E](self: LspClient[E]): Future[void] {.async.} =
   #[
     The initialized notification is sent from the client to the server after the client received the result of the initialize request
     but before the client is sending any other request or notification to the server. The server can use the initialized notification
     for example to dynamically register capabilities. The initialized notification may only be sent once.
     ]#
-  result = await self.lspEndpoint.sendNotification("initialized")
+  await self.lspEndpoint.sendNotification("initialized")
 
 
-proc shutdown*(self: LspClient): Future[ResponseMessage] {.async.} =
+proc shutdown*[E](self: LspClient[E]): Future[ResponseMessage] {.async.} =
   #[
   The initialized notification is sent from the client to the server after the client received the result of the initialize request
   but before the client is sending any other request or notification to the server. The server can use the initialized notification
@@ -74,13 +76,14 @@ proc shutdown*(self: LspClient): Future[ResponseMessage] {.async.} =
   return ResponseMessage(resp.parseJson)
 
 
-proc exit*(self: LspClient) =
+proc exit*[E](self: LspClient[E]) {.async.} =
   #[
-  The initialized notification is sent from the client to the server after the client received the result of the initialize request
-  but before the client is sending any other request or notification to the server. The server can use the initialized notification
-  for example to dynamically register capabilities. The initialized notification may only be sent once.
+  A notification to ask the server to exit its process.
+  The server should exit with success code 0 if the shutdown request has been received before;
+  otherwise with error code 1.
   ]#
-  discard self.lspEndpoint.sendNotification("exit")
+  # send shutdown notification then server exit with 0
+  await self.lspEndpoint.sendNotification("exit")
 
 
 proc didOpen*(self: LspClient, textDocument: TextDocumentItem): Future[string]{.async.} =
