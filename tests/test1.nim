@@ -21,7 +21,7 @@ echo waitFor client.initialize(
       initializationOptions = some(create(ClientInfo, name = "moe", version = some("0.2.0"))),
       processId = getCurrentProcessId(),
       rootPath = none(string),
-      rootUri = "/home/fox/git/moe",
+      rootUri = "file://" & currentSourcePath,
       capabilities = caps,
   trace = none(string),
   workspaceFolders = none(seq[WorkspaceFolder]))
