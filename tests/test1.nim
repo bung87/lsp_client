@@ -16,8 +16,8 @@ let caps = create(ClientCapabilities,
         textDocument = none(TextDocumentClientCapabilities),
         window = none(WindowClientCapabilities),
         experimental = none(JsonNode))
-echo caps.JsonNode
-echo waitFor client.initialize(
+
+echo "initialize:\n", waitFor client.initialize(
       initializationOptions = some(create(ClientInfo, name = "moe", version = some("0.2.0"))),
       processId = getCurrentProcessId(),
       rootPath = none(string),
@@ -25,3 +25,4 @@ echo waitFor client.initialize(
       capabilities = caps,
   trace = none(string),
   workspaceFolders = none(seq[WorkspaceFolder]))
+echo "initialized:\n", waitFor client.initialized()

@@ -22,7 +22,7 @@ proc newLspClient*[E](lspEndpoint: E): LspClient[E] =
   result.lspEndpoint = lspEndpoint
 
 
-proc initialize*[E, T, P](self: E, processId: P, rootPath: Option[string], rootUri: DocumentUri,
+proc initialize*[E, T, P](self: LspClient[E], processId: P, rootPath: Option[string], rootUri: DocumentUri,
     initializationOptions: Option[T], capabilities: ClientCapabilities, trace: Option[TraceValue],
     workspaceFolders: Option[seq[WorkspaceFolder]]): Future[string]{.async.} =
   #[
@@ -54,13 +54,13 @@ proc initialize*[E, T, P](self: E, processId: P, rootPath: Option[string], rootU
       workspaceFolders = workspaceFolders))
 
 
-proc initialized*(self: LspClient) =
+proc initialized*[E](self: LspClient[E]): Future[string] {.async.} =
   #[
     The initialized notification is sent from the client to the server after the client received the result of the initialize request
     but before the client is sending any other request or notification to the server. The server can use the initialized notification
     for example to dynamically register capabilities. The initialized notification may only be sent once.
     ]#
-  discard self.lspEndpoint.sendNotification("initialized")
+  result = await self.lspEndpoint.sendNotification("initialized")
 
 
 proc shutdown*(self: LspClient): Future[ResponseMessage] {.async.} =
