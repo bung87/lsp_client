@@ -9,7 +9,7 @@ jsonSchema:
     name: string
     version ?: string
 
-let endPoint = LspNimEndpoint()
+let endPoint = newLspNimEndpoint()
 let client = newLspClient(endPoint)
 
 echo waitFor client.initialize(

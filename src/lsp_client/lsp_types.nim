@@ -22,30 +22,41 @@ class(LspEndpoint):
     self:
       id = 0
       process = default(AsyncProcess)
+      input = default(AsyncInputStream)
+      output = default(AsyncOutputStream)
 
-  method start*() {.base.} = discard
-  method setProcess*(p: AsyncProcess) = self.process = p
-  method stop*() {.base.} = discard
+  method start*() {.base.} # = discard
+  method setProcess*(p: AsyncProcess) =
+    self.process = p
+    self.input = asyncPipeInput(self.process.outputHandle)
+    self.output = asyncPipeOutput(self.process.inputHandle)
+  method getId*(): int = self.id
+  method incId*() = inc self.id
+  # method write*(s:string):Future[int] {.async.} = result = await self.output.write(s)
+  method write*(p: pointer, len: int): Future[int] {.async.} = result = await self.process.inputHandle.write(p, len)
+  method stop*() {.base.} # = discard
   method sendNotification*(noti: string): Future[string]{.base.} # = ""
   method sendNotification*[T](`method`: string, params: T): Future[string]{.base.} # = ""
   method callMethod*(`method`: string): Future[string] {.base.} # = ""
   method callMethod*[T](`method`: string, params: T): Future[string] {.base.} #= ""
 
   method readMessage*(): Future[string] {.async.} =
+    # Note: nimlsp debug build will produce debug info to stdout
     var contentLen = -1
     var headerStarted = false
 
-    let input = asyncPipeInput(self.process.outputHandle)
-    while input.readable:
-      let ln = await input.readLine()
+    # let input = asyncPipeInput(self.process.outputHandle)
+    while self.input.readable:
+      let ln = await self.input.readLine()
+      debugEcho ln
       if ln.len != 0:
-        headerStarted = true
         let sep = ln.find(':')
         if sep == -1:
-          raise newException(MalformedFrame, "invalid header line: " & ln)
+          continue
+
+          # raise newException(MalformedFrame, "invalid header line: " & repr ln)
 
         let valueStart = ln.skipWhitespace(sep + 1)
-
         case ln[0 ..< sep]
         of "Content-Type":
           if ln.find("utf-8", valueStart) == -1 and ln.find("utf8", valueStart) == -1:
@@ -56,13 +67,15 @@ class(LspEndpoint):
                                                 ln.substr(valueStart))
         else:
           # Unrecognized headers are ignored
-          discard
+          continue
+        headerStarted = true
       elif not headerStarted:
         continue
       else:
         if contentLen != -1:
-          let s = `@`(input.read(contentLen))
+          let s = `@`(self.input.read(contentLen))
           result = cast[string](s)
+          echo result
           when defined(debugCommunication):
             stderr.write(result)
             stderr.write("\n")

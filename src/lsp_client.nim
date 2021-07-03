@@ -8,20 +8,20 @@ type DocumentUri = string
 #   off="off",messages="messages",verbose="verbose"
 type TraceValue = string
 type
-  LspClientObj = object of RootObj
-    lspEndpoint: LspEndpoint
-  LspClient* = ref LspClientObj
+  LspClientObj[E] = object of RootObj
+    lspEndpoint: E
+  LspClient*[E] = ref LspClientObj[E]
 
-proc newLspClient*(lspEndpoint: LspEndpoint): LspClient =
+proc newLspClient*[E](lspEndpoint: E): LspClient[E] =
   #[
   Constructs a new LspClient instance.
   :param lspEndpoint: TODO
   ]#
-  new result
+  result = LspClient[E]()
   result.lspEndpoint = lspEndpoint
 
 
-proc initialize*[T, P](self: LspClient, processId: P, rootPath: Option[string], rootUri: DocumentUri,
+proc initialize*[E, T, P](self: E, processId: P, rootPath: Option[string], rootUri: DocumentUri,
     initializationOptions: Option[T], capabilities: ClientCapabilities, trace: Option[TraceValue],
     workspaceFolders: Option[seq[WorkspaceFolder]]): Future[string]{.async.} =
   #[

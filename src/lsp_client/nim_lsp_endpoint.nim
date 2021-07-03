@@ -6,10 +6,10 @@ import json
 import oop_utils/standard_class
 # type LspNimEndpoint* = ref object of LspEndpoint
 class(LspNimEndpoint of LspEndpoint):
-  # ctor(newLspNimEndpoint) proc() =
-  #   self:
-  #     id = 0
-  #     process = default(AsyncProcess)
+  ctor(newLspNimEndpoint) #proc() =
+    # self:
+    #   id = 0
+    #   process = default(AsyncProcess)
 
   method start*() =
     self.setProcess startProcess(findExe("nimlsp"))
@@ -20,14 +20,18 @@ class(LspNimEndpoint of LspEndpoint):
   # template callMethod*(self: LspEndpoint,`method`:string):string = ""
   # template callMethod*(self: LspEndpoint,`method`:string,params:typed):string = ""
 
-  method callMethod*[T](`method`: string, params: T){.async.} =
-    # if not isValid(params,type params):
+  method callMethod*[T](`method`: string, params: T): Future[string]{.async.} =
+    # if not isValid(cast[JsonNode](params),typedesc[type params]):
     #   raise newException(ValueError)
-    let id = self.id
-    inc self.id
-    let jo = initGRequest(id = id, `method` = `method`, params = params)
+    let id = self.getId()
+    self.incId()
+    let jo = initGRequest(id = id, `method` = `method`, params = cast[JsonNode](params))
 
-    let str = % jo
-    var msg = "Content-Length: " & $str.len & "\r\n\r\n" & str
-    await self.process.inputHandle.write(msg.addr, msg.len)
-    await self.readMessage()
+    let str = $ % jo
+    var msg: string = "Content-Type: application/vscode-jsonrpc; charset=utf-8\r\n"
+    msg = msg & "Content-Length: " & $str.len & "\r\n\r\n" & str
+    debugEcho repr msg
+
+    let written = await self.write(msg.addr, msg.len)
+    doAssert written == msg.len
+    result = await self.readMessage()
