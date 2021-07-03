@@ -30,6 +30,7 @@ class(LspEndpoint):
     self.err = asyncPipeInput(self.process.errorHandle)
   method getId*(): int{.base.} = self.id
   method incId*(){.base.} = inc self.id
+  method exitCode*(): int = self.process.peekExitCode
   # method write*(s:string):Future[int] {.async.} = result = await self.output.write(s)
   method write*(p: pointer, len: int): Future[int] {.base, async.} = result = await self.process.inputHandle.write(p, len)
   method stop*() {.base.} # = discard

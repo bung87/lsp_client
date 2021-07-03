@@ -30,4 +30,4 @@ waitFor client.initialized()
 echo "initialized:\n"
 let resp2 = waitFor client.shutdown()
 echo resp2.JsonNode
-waitFor client.exit()
+echo waitFor client.exit()

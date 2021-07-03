@@ -75,7 +75,7 @@ proc shutdown*[E](self: LspClient[E]): Future[ResponseMessage] {.async.} =
   return ResponseMessage(resp.parseJson)
 
 
-proc exit*[E](self: LspClient[E]) {.async.} =
+proc exit*[E](self: LspClient[E]): Future[int] {.async.} =
   #[
   A notification to ask the server to exit its process.
   The server should exit with success code 0 if the shutdown request has been received before;
@@ -83,6 +83,7 @@ proc exit*[E](self: LspClient[E]) {.async.} =
   ]#
   # send shutdown notification then server exit with 0
   await self.lspEndpoint.sendNotification("exit")
+  result = self.lspEndpoint.exitCode
 
 
 proc didOpen*(self: LspClient, textDocument: TextDocumentItem): Future[string]{.async.} =
