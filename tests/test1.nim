@@ -2,7 +2,7 @@ include lsp_client
 include lsp_client / nim_lsp_endpoint
 import jsonschema
 import os
-
+import asyncdispatch
 
 jsonSchema:
   ClientInfo:
@@ -12,7 +12,7 @@ jsonSchema:
 let endPoint = LspNimEndpoint()
 let client = newLspClient(endPoint)
 
-echo client.initialize(
+echo waitFor client.initialize(
       initializationOptions = some(create(ClientInfo, name = "moe", version = some("0.2.0"))),
       processId = getCurrentProcessId(),
       rootPath = none(string),

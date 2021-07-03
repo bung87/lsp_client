@@ -23,7 +23,7 @@ proc newLspClient*(lspEndpoint: LspEndpoint): LspClient =
 
 proc initialize*[T, P](self: LspClient, processId: P, rootPath: Option[string], rootUri: DocumentUri,
     initializationOptions: Option[T], capabilities: ClientCapabilities, trace: Option[TraceValue],
-    workspaceFolders: Option[seq[WorkspaceFolder]]): string =
+    workspaceFolders: Option[seq[WorkspaceFolder]]): Future[string]{.async.} =
   #[
     The initialize request is sent as the first request from the client to the server. If the server receives a request or notification 
     before the initialize request it should act as follows:
