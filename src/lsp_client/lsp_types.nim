@@ -12,11 +12,7 @@ proc skipWhitespace(x: string, pos: int): int =
   result = pos
   while result < x.len and x[result] in Whitespace:
     inc result
-# type
-#   LspEndpointObj = object of RootObj
-#     process*: AsyncProcess
-#     id*: int
-#   LspEndpoint* = ref LspEndpointObj
+
 class(LspEndpoint):
   ctor(newLspEndpoint) proc() =
     self:
@@ -51,7 +47,6 @@ class(LspEndpoint):
     var contentLen = -1
     var headerStarted = false
 
-    # let input = asyncPipeInput(self.process.outputHandle)
     while self.input.readable:
       let ln = await self.input.readLine()
       debugEcho ln
