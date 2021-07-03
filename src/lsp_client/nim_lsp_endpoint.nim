@@ -12,7 +12,7 @@ class(LspNimEndpoint of LspEndpoint):
     #   process = default(AsyncProcess)
 
   method start*() =
-    self.setProcess startProcess(findExe("nimlsp"))
+    self.setProcess startProcess(findExe("nimlsp"), options = {})
   method stop*() = discard
 
   method sendNotification*(noti: string): Future[string]{.async.} #= ""
@@ -34,4 +34,6 @@ class(LspNimEndpoint of LspEndpoint):
 
     let written = await self.write(msg.addr, msg.len)
     doAssert written == msg.len
+    echo await self.readError()
     result = await self.readMessage()
+    echo result

@@ -24,12 +24,14 @@ class(LspEndpoint):
       process = default(AsyncProcess)
       input = default(AsyncInputStream)
       output = default(AsyncOutputStream)
+      err = default(AsyncInputStream)
 
   method start*() {.base.} # = discard
   method setProcess*(p: AsyncProcess) =
     self.process = p
     self.input = asyncPipeInput(self.process.outputHandle)
     self.output = asyncPipeOutput(self.process.inputHandle)
+    self.err = asyncPipeInput(self.process.errorHandle)
   method getId*(): int = self.id
   method incId*() = inc self.id
   # method write*(s:string):Future[int] {.async.} = result = await self.output.write(s)
@@ -39,6 +41,10 @@ class(LspEndpoint):
   method sendNotification*[T](`method`: string, params: T): Future[string]{.base.} # = ""
   method callMethod*(`method`: string): Future[string] {.base.} # = ""
   method callMethod*[T](`method`: string, params: T): Future[string] {.base.} #= ""
+  method readError*(): Future[string]{.async.} =
+    while self.err.readable:
+      let s = await self.err.readLine()
+      result = result & s & "\n"
 
   method readMessage*(): Future[string] {.async.} =
     # Note: nimlsp debug build will produce debug info to stdout
