@@ -1,5 +1,6 @@
 import lsp_client/lsp_types
 include lsp_client/messages
+import options
 
 type DocumentUri = string
 type TraceValue = enum
@@ -19,7 +20,7 @@ proc newLspClient*(lspEndpoint:LspEndpoint):LspClient =
   result.lspEndpoint = lspEndpoint
 
 
-proc initialize*[T](self:LspClient, processId = -1, rootPath:string, rootUri:DocumentUri, initializationOptions:T, capabilities:ClientCapabilities, trace:TraceValue, workspaceFolders:seq[WorkspaceFolder]) =
+proc initialize*[T](self:LspClient, processId: Option[int], rootPath:Option[string], rootUri:DocumentUri, initializationOptions:Option[T], capabilities:ClientCapabilities, trace:Option[TraceValue], workspaceFolders:Option[seq[WorkspaceFolder]]) =
     #[
     The initialize request is sent as the first request from the client to the server. If the server receives a request or notification 
     before the initialize request it should act as follows:
@@ -43,7 +44,7 @@ proc initialize*[T](self:LspClient, processId = -1, rootPath:string, rootUri:Doc
                                     It can be `null` if the client supports workspace folders but none are configured.
     ]#
     self.lspEndpoint.start()
-    return self.lspEndpoint.callMethod("initialize", processId=processId, rootPath=rootPath, rootUri=rootUri, initializationOptions=initializationOptions, capabilities=capabilities, trace=trace, workspaceFolders=workspaceFolders)
+    return self.lspEndpoint.callMethod("initialize", InitializeParams.create(processId=processId, rootPath=rootPath, rootUri=rootUri, initializationOptions=initializationOptions, capabilities=capabilities, trace=trace, workspaceFolders=workspaceFolders))
 
 
 proc initialized*(self:LspClient) =
