@@ -14,3 +14,6 @@ requires "asynctools"
 requires "faststreams"
 requires "jsonschema" 
 requires "oop_utils"
+
+before test:
+    requires "https://github.com/bung87/nimlsp#devel"

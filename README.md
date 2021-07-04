@@ -1,4 +1,4 @@
-# lsp_client  
+# lsp_client  ![Build Status](https://github.com/bung87/lsp_client/workflows/Test/badge.svg) 
 
 Language server protocol client implementated in Nim language.  
 
