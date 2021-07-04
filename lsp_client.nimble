@@ -14,6 +14,7 @@ requires "asynctools"
 requires "faststreams"
 requires "https://github.com/bung87/jsonschema#basetype" 
 requires "oop_utils"
+requires "jsony"
 
 before test:
     requires "https://github.com/bung87/nimlsp#devel"

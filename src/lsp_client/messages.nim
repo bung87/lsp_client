@@ -5,6 +5,9 @@ import json
 import options
 import sequtils
 include ./client_capabilities
+type DocumentUri* = string
+type SymbolTag* = enum
+  Deprecated = 1
 
 type SignatureHelpTriggerKind* = enum
   Invoked = 1, TriggerCharacter, ContentChange
@@ -17,7 +20,9 @@ jsonSchema:
     id: int or float or string
     "method": string
     params ?: any[] or any
-
+  AbstractResponseMessage:
+    id: int or float or string or nil
+    error ?: ResponseError
   ResponseMessage extends Message:
     id: int or float or string or nil
     "result" ?: any
@@ -101,7 +106,20 @@ jsonSchema:
   MarkupContent:
     kind: string # "plaintext" or "markdown"
     value: string
-
+  LocationLink:
+    originSelectionRange ?: Range
+    targetUri: DocumentUri
+    targetRange: Range
+    targetSelectionRange: Range
+  DocumentSymbol:
+    name: string
+    detail ?: string
+    kind: SymbolKind
+    tags ?: SymbolTag{int}
+    deprecated ?: bool
+    "range": Range
+    selectionRange: Range
+    children ?: DocumentSymbol[]
   InitializeParams:
     processId: int or float or nil
     rootPath ?: string or nil
@@ -244,13 +262,32 @@ jsonSchema:
   #   textDocument ?: TextDocumentClientCapabilities
   #   experimental ?: any
 
+  ServerInfo:
+    name: string
+    version ?: string
   WorkspaceFolder:
     uri: string
     name: string
 
   InitializeResult:
     capabilities: ServerCapabilities
+    serverInfo ?: ServerInfo
+  # responses
+  InitializeResponse extends AbstractResponseMessage:
+    "result" ?: InitializeResult or nil
 
+  DocumentSymbolResponse extends AbstractResponseMessage:
+    "result" ?: DocumentSymbol[] or SymbolInformation[] or nil
+  DefinitionResponse extends AbstractResponseMessage:
+    "result" ?: Location or Location[] or LocationLink[] or nil
+  TypeDefinitionResponse extends AbstractResponseMessage:
+    "result" ?: Location or Location[] or LocationLink[] or nil
+  SignatureHelpResponse extends AbstractResponseMessage:
+    "result" ?: SignatureHelp or nil
+  CompletionResponse extends AbstractResponseMessage:
+    "result" ?: CompletionItem[] or CompletionList or nil
+  DeclarationResponse extends AbstractResponseMessage:
+    "result" ?: Location or Location[] or LocationLink[] or nil
   InitializeError:
     retry: bool
 

@@ -3,6 +3,7 @@ include lsp_client / nim_lsp_endpoint
 import jsonschema
 import os
 import asyncdispatch
+include moe_doc_caps
 
 jsonSchema:
   ClientInfo:
@@ -14,7 +15,7 @@ let client = newLspClient(endPoint)
 
 let caps = create(ClientCapabilities,
         workspace = none(WorkspaceClientCapabilities),
-        textDocument = none(TextDocumentClientCapabilities),
+        textDocument = some(docCaps),
         window = none(WindowClientCapabilities),
         experimental = none(JsonNode))
 

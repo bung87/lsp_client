@@ -1,4 +1,4 @@
-include lsp_client
+# include lsp_client
 import sequtils
 const TagSupportValueSet = {low(CompletionItemTag) .. high(
     CompletionItemTag)}.toSeq
