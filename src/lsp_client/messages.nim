@@ -6,6 +6,9 @@ import options
 import sequtils
 include ./client_capabilities
 
+type SignatureHelpTriggerKind* = enum
+  Invoked = 1, TriggerCharacter, ContentChange
+
 jsonSchema:
   Message:
     jsonrpc: string
@@ -440,6 +443,7 @@ jsonSchema:
     diagnostics: Diagnostic[]
 
   CompletionParams extends TextDocumentPositionParams:
+    workDoneToken ?: string or int #ProgressToken
     context ?: CompletionContext
 
   CompletionContext:
@@ -508,7 +512,33 @@ jsonSchema:
 
   DocumentSymbolParams:
     textDocument: TextDocumentIdentifier
-
+    workDoneToken ?: int or string # ProgressToken
+    partialResultToken ?: int or string # ProgressToken
+  DefinitionParams:
+    textDocument: TextDocumentIdentifier
+    position: Position
+    workDoneToken ?: int or string # ProgressToken
+    partialResultToken ?: int or string # ProgressToken
+  TypeDefinitionParams: # since 3.6.0
+    textDocument: TextDocumentIdentifier
+    position: Position
+    workDoneToken ?: int or string # ProgressToken
+    partialResultToken ?: int or string # ProgressToken
+  SignatureHelpContext: # since 3.15.0
+    triggerKind: SignatureHelpTriggerKind
+    triggerCharacter ?: string
+    isRetrigger: bool
+    activeSignatureHelp ?: SignatureHelp
+  SignatureHelpParams:
+    textDocument: TextDocumentIdentifier
+    position: Position
+    workDoneToken ?: int or string # ProgressToken
+    context ?: SignatureHelpContext # since 3.15
+  DeclarationParams:
+    textDocument: TextDocumentIdentifier
+    position: Position
+    workDoneToken ?: int or string # ProgressToken
+    partialResultToken ?: int or string # ProgressToken
   SymbolInformation:
     name: string
     kind: int # SymbolKind

@@ -120,20 +120,23 @@ proc didChange*[E](self: LspClient[E], textDocument: VersionedTextDocumentIdenti
       textDocument = textDocument, contentChanges = contentChanges))
 
 
-proc documentSymbol*[E](self: LspClient[E], textDocument: TextDocumentIdentifier): Future[string]{.async.} =
+proc documentSymbol*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, workDoneToken = none(string),
+    partialResultToken = none(string)): Future[string]{.async.} =
+  # https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#documentSymbolParams
   #[
-  The document symbol request is sent from the client to the server to return a flat list of all symbols found in a given text document. 
+  The document symbol request is sent from the client to the server to return a flat list of all symbols found in a given text document.
   Neither the symbol's location range nor the symbol's container name should be used to infer a hierarchy.
   :param TextDocumentItem textDocument: The text document.
-  :returns DocumentSymbol[] | SymbolInformation[] | null
+  :result DocumentSymbol[] | SymbolInformation[] | null
   ]#
+
   return await self.lspEndpoint.callMethod("textDocument/documentSymbol", DocumentSymbolParams.create(
-      textDocument = textDocument))
+      textDocument = textDocument, workDoneToken = workDoneToken, partialResultToken = partialResultToken))
   # return [lsp_structs.SymbolInformation(**sym) for sym in result_dict]
 
 
-proc definition*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position): Future[
-    string]{.async.} =
+proc definition*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position, workDoneToken = none(
+    string), partialResultToken = none(string)): Future[string]{.async.} =
   # https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#textDocument_definition
   #[
   The goto definition request is sent from the client to the server to resolve the definition location of a symbol at a given text document position.
@@ -144,8 +147,9 @@ proc definition*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, po
     error: code and message set in case an exception happens during the definition request
   ]#
   # TextDocumentPositionParams,WorkDoneProgressParams,PartialResultParams
-  return await self.lspEndpoint.callMethod("textDocument/definition", TextDocumentPositionParams.create(
-      textDocument = textDocument, position = position))
+  return await self.lspEndpoint.callMethod("textDocument/definition", DefinitionParams.create(
+      textDocument = textDocument, position = position, workDoneToken = workDoneToken,
+      partialResultToken = partialResultToken))
   # return [lsp_structs.Location(**l) for l in result_dict]
 
 
@@ -158,26 +162,26 @@ proc typeDefinition*[E](self: LspClient[E], textDocument: TextDocumentIdentifier
   :param Position position: The position inside the text document.
   ]#
   # TextDocumentPositionParams,WorkDoneProgressParams,PartialResultParams
-  return await self.lspEndpoint.callMethod("textDocument/typeDefinition", TextDocumentPositionParams.create(
+  return await self.lspEndpoint.callMethod("textDocument/typeDefinition", TypeDefinitionParams.create(
       textDocument = textDocument, position = position))
   # return [lsp_structs.Location(**l) for l in result_dict]
 
 
-proc signatureHelp*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position): Future[
-    string]{.async.} =
+proc signatureHelp*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position,
+    workDoneToken = none(string), context = none(SignatureHelpContext)): Future[string]{.async.} =
   # https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#textDocument_signatureHelp
   #[
   The signature help request is sent from the client to the server to request signature information at a given cursor position.
   :param TextDocumentIdentifier textDocument: The text document.
   :param Position position: The position inside the text document.
   ]#
-  return await self.lspEndpoint.callMethod("textDocument/signatureHelp", TextDocumentPositionParams.create(
-      textDocument = textDocument, position = position))
+  return await self.lspEndpoint.callMethod("textDocument/signatureHelp", SignatureHelpParams.create(
+      textDocument = textDocument, position = position, workDoneToken = workDoneToken, context = context))
   # return lsp_structs.SignatureHelp(**result_dict)
 
 
-proc completion*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position, context: Option[
-    CompletionContext]): Future[string]{.async.} =
+proc completion*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position, workDoneToken = none(
+    string), context = none(CompletionContext)): Future[CompletionList]{.async.} =
   # https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#completionParams
   #[
   The Completion request is sent from the client to the server to compute completion items at a given cursor position.
@@ -185,17 +189,16 @@ proc completion*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, po
   :param Position position: The position inside the text document.
   :param CompletionContext context: The completion context. This is only available if the client specifies
     to send this using `ClientCapabilities.textDocument.completion.contextSupport === true`
+  :result CompletionItem[] | CompletionList | null
   ]#
-  return await self.lspEndpoint.callMethod("textDocument/completion", CompletionParams.create(
-      textDocument = textDocument, position = position, context = context))
-  # if "isIncomplete" in result_dict:
-  #     return lsp_structs.CompletionList(**result_dict)
-
-  # return [lsp_structs.CompletionItem(**l) for l in result_dict]
+  let resp = await self.lspEndpoint.callMethod("textDocument/completion", CompletionParams.create(
+      textDocument = textDocument, position = position, workDoneToken = workDoneToken, context = context))
+  let j = resp.parseJson()
+  return CompletionList(j)
 
 
-proc declaration*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position): Future[
-    string]{.async.} =
+proc declaration*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position, workDoneToken = none(
+    string), partialResultToken = none(string)): Future[string]{.async.} =
   # https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#declarationParams
   #[
   The go to declaration request is sent from the client to the server to resolve the declaration location of a
@@ -206,8 +209,10 @@ proc declaration*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, p
   :param Position position: The position inside the text document.
   ]#
   # TextDocumentPositionParams,WorkDoneProgressParams, PartialResultParams
-  return await self.lspEndpoint.callMethod("textDocument/declaration", TextDocumentPositionParams.create(
-      textDocument = textDocument, position = position))
+  let resp = await self.lspEndpoint.callMethod("textDocument/declaration", DeclarationParams.create(
+      textDocument = textDocument, position = position, workDoneToken = workDoneToken,
+      partialResultToken = partialResultToken))
+  return resp
   # if "uri" in result_dict:
     # return lsp_structs.Location(**result_dict)
 
