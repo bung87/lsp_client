@@ -11,6 +11,7 @@ jsonSchema:
 
 let endPoint = newLspNimEndpoint()
 let client = newLspClient(endPoint)
+
 let caps = create(ClientCapabilities,
         workspace = none(WorkspaceClientCapabilities),
         textDocument = none(TextDocumentClientCapabilities),

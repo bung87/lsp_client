@@ -43,7 +43,7 @@ type
     Event = 24,
     Operator = 25,
     TypeParameter = 26
-  CompletionItemKind* {.pure.} = enum
+  CompletionItemKindEnum* {.pure.} = enum
     Text = 1,
     Method = 2,
     Function = 3,

@@ -1,6 +1,6 @@
 import jsonschema
 type InsertTextMode {.pure.} = enum
-  asIs=1,adjustIndentation
+  asIs = 1, adjustIndentation
 
 type MarkupKind {.pure.} = enum
   plaintext = 0
@@ -122,7 +122,8 @@ jsonSchema:
 
   TagSupportCompletionItemCompletionClientCapabilities:
     # The tags supported by the client.
-    valueSet: CompletionItemTag[]
+    valueSet: CompletionItemTag{int}
+    # valueSet: int[]
 
   CompletionItemKind:
     # The completion item kind values the client supports. When this
@@ -133,7 +134,7 @@ jsonSchema:
     # If this property is not present the client only supports
     # the completion items kinds from `Text` to `Reference` as defined in
     # the initial version of the protocol.
-    valueSet ?: CompletionItemKind[]
+    valueSet ?: CompletionItemKindEnum{int}
 
   CompletionItemCompletionClientCapabilities:
     # Client supports snippets as insert text.
@@ -149,7 +150,7 @@ jsonSchema:
 
     # Client supports the follow content formats for the documentation
     # property. The order describes the preferred format of the client.
-    documentationFormat ?: MarkupKind[]
+    documentationFormat ?: MarkupKind{int}
 
       # Client supports the deprecated property on a completion item.
     deprecatedSupport ?: bool
@@ -165,7 +166,7 @@ jsonSchema:
     # @since 3.15.0
     tagSupport ?: TagSupportCompletionItemCompletionClientCapabilities
 
-    
+
 
   CompletionClientCapabilities:
     # Whether completion supports dynamic registration.
@@ -178,7 +179,7 @@ jsonSchema:
     # The client supports to send additional context information for a
     # `textDocument/completion` request.
     contextSupport ?: bool
-    insertTextMode?: InsertTextMode # since 3.17.0
+    insertTextMode ?: InsertTextMode{.int.} #InsertTextMode # since 3.17.0
 
   HoverClientCapabilities:
     # Whether hover supports dynamic registration.
@@ -186,12 +187,12 @@ jsonSchema:
 
     # Client supports the follow content formats for the content
     # property. The order describes the preferred format of the client.
-    contentFormat ?: MarkupKind[]
+    contentFormat ?: MarkupKind{int}
 
   #SignatureInformation:
     # Client supports the follow content formats for the documentation
     # property. The order describes the preferred format of the client.
-    documentationFormat ?: MarkupKind[]
+    documentationFormat ?: MarkupKind{int}
 
   ParameterInformation:
     # The client supports processing label offsets instead of a
