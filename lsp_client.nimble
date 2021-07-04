@@ -12,7 +12,7 @@ srcDir        = "src"
 requires "nim >= 1.4.0"
 requires "asynctools"
 requires "faststreams"
-requires "jsonschema" 
+requires "https://github.com/bung87/jsonschema#basetype" 
 requires "oop_utils"
 
 before test:
