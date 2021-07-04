@@ -290,6 +290,8 @@ jsonSchema:
     "result" ?: Location or Location[] or LocationLink[] or nil
   RenameResponse extends AbstractResponseMessage:
     "result" ?: WorkspaceEdit or nil
+  HoverResponse extends AbstractResponseMessage:
+    "result" ?: Hover or nil
   InitializeError:
     retry: bool
 
@@ -666,6 +668,11 @@ jsonSchema:
     textDocument: TextDocumentIdentifier
     position: Position
     newName: string
+    workDoneToken ?: int or string #ProgressToken
+
+  HoverParams:
+    textDocument: TextDocumentIdentifier
+    position: Position
     workDoneToken ?: int or string #ProgressToken
 
   WorkDoneProgressParams:
