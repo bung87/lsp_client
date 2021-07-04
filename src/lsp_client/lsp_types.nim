@@ -31,6 +31,7 @@ class(LspEndpoint):
   method getId*(): int{.base.} = self.id
   method incId*(){.base.} = inc self.id
   method exitCode*(): int = self.process.peekExitCode
+  # method waitForExit*():Future[int]{.async.} = result = await self.process.waitForExit()
   # method write*(s:string):Future[int] {.async.} = result = await self.output.write(s)
   method write*(p: pointer, len: int): Future[int] {.base, async.} =
     result = await self.process.inputHandle.write(p, len)

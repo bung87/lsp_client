@@ -83,7 +83,9 @@ proc exit*[E](self: LspClient[E]): Future[int] {.async.} =
   ]#
   # send shutdown notification then server exit with 0
   await self.lspEndpoint.sendNotification("exit")
-  result = self.lspEndpoint.exitCode
+  while self.lspEndpoint.exitCode != 259:
+    result = self.lspEndpoint.exitCode
+    break
 
 
 proc didOpen*(self: LspClient, textDocument: TextDocumentItem): Future[string]{.async.} =
@@ -140,7 +142,8 @@ proc definition*(self: LspClient, textDocument: TextDocumentIdentifier, position
   # return [lsp_structs.Location(**l) for l in result_dict]
 
 
-proc typeDefinition*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position): Future[string]{.async.} =
+proc typeDefinition*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position): Future[
+    string]{.async.} =
   #[
   The goto type definition request is sent from the client to the server to resolve the type definition location of a symbol at a given text document position.
   :param TextDocumentIdentifier textDocument: The text document.
@@ -151,7 +154,8 @@ proc typeDefinition*(self: LspClient, textDocument: TextDocumentIdentifier, posi
   # return [lsp_structs.Location(**l) for l in result_dict]
 
 
-proc signatureHelp*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position): Future[string]{.async.} =
+proc signatureHelp*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position): Future[
+    string]{.async.} =
   #[
   The signature help request is sent from the client to the server to request signature information at a given cursor position.            
   :param TextDocumentIdentifier textDocument: The text document.
