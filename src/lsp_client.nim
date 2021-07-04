@@ -88,7 +88,7 @@ proc exit*[E](self: LspClient[E]): Future[int] {.async.} =
     break
 
 
-proc didOpen*(self: LspClient, textDocument: TextDocumentItem): Future[string]{.async.} =
+proc didOpen*[E](self: LspClient[E], textDocument: TextDocumentItem): Future[void]{.async.} =
   #[
   The document open notification is sent from the client to the server to signal newly opened text documents. The document's truth is
   now managed by the client and the server must not try to read the document's truth using the document's uri. Open in this sense 
@@ -101,40 +101,47 @@ proc didOpen*(self: LspClient, textDocument: TextDocumentItem): Future[string]{.
   handles the new language id as well.
   :param TextDocumentItem textDocument: The document that was opened.
   ]#
-  return await self.lspEndpoint.sendNotification("textDocument/didOpen", DidOpenTextDocumentParams.create(
+  await self.lspEndpoint.sendNotification("textDocument/didOpen", DidOpenTextDocumentParams.create(
       textDocument = textDocument))
 
 
-proc didChange*(self: LspClient, textDocument: VersionedTextDocumentIdentifier, contentChanges: seq[
-    TextDocumentContentChangeEvent]): Future[string]{.async.} =
+proc didChange*[E](self: LspClient[E], textDocument: VersionedTextDocumentIdentifier, contentChanges: seq[
+    TextDocumentContentChangeEvent]): Future[void]{.async.} =
+  # https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#didChangeTextDocumentParams
   #[
-  The document change notification is sent from the client to the server to signal changes to a text document. 
+  The document change notification is sent from the client to the server to signal changes to a text document.
   In 2.0 the shape of the params has changed to include proper version numbers and language ids.
   :param VersionedTextDocumentIdentifier textDocument: The initial trace setting. If omitted trace is disabled ('off').
   :param TextDocumentContentChangeEvent[] contentChanges: The actual content changes. The content changes describe single state changes
-      to the document. So if there are two content changes c1 and c2 for a document in state S then c1 move the document 
-      to S' and c2 to S''.
+    to the document. So if there are two content changes c1 and c2 for a document in state S then c1 move the document
+    to S' and c2 to S''.
   ]#
-  return await self.lspEndpoint.sendNotification("textDocument/didChange", DidChangeTextDocumentParams.create(
+  await self.lspEndpoint.sendNotification("textDocument/didChange", DidChangeTextDocumentParams.create(
       textDocument = textDocument, contentChanges = contentChanges))
 
 
-proc documentSymbol*(self: LspClient, textDocument: TextDocumentIdentifier): Future[string]{.async.} =
+proc documentSymbol*[E](self: LspClient[E], textDocument: TextDocumentIdentifier): Future[string]{.async.} =
   #[
   The document symbol request is sent from the client to the server to return a flat list of all symbols found in a given text document. 
   Neither the symbol's location range nor the symbol's container name should be used to infer a hierarchy.
   :param TextDocumentItem textDocument: The text document.
+  :returns DocumentSymbol[] | SymbolInformation[] | null
   ]#
   return await self.lspEndpoint.callMethod("textDocument/documentSymbol", DocumentSymbolParams.create(
       textDocument = textDocument))
   # return [lsp_structs.SymbolInformation(**sym) for sym in result_dict]
 
 
-proc definition*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position): Future[string]{.async.} =
+proc definition*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position): Future[
+    string]{.async.} =
+  # https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#textDocument_definition
   #[
   The goto definition request is sent from the client to the server to resolve the definition location of a symbol at a given text document position.
   :param TextDocumentIdentifier textDocument: The text document.
   :param Position position: The position inside the text document.
+  result: Location | Location[] | LocationLink[] | null
+    partial result: Location[] | LocationLink[]
+    error: code and message set in case an exception happens during the definition request
   ]#
   # TextDocumentPositionParams,WorkDoneProgressParams,PartialResultParams
   return await self.lspEndpoint.callMethod("textDocument/definition", TextDocumentPositionParams.create(
@@ -142,22 +149,25 @@ proc definition*(self: LspClient, textDocument: TextDocumentIdentifier, position
   # return [lsp_structs.Location(**l) for l in result_dict]
 
 
-proc typeDefinition*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position): Future[
+proc typeDefinition*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position): Future[
     string]{.async.} =
+  # https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#textDocument_typeDefinition
   #[
   The goto type definition request is sent from the client to the server to resolve the type definition location of a symbol at a given text document position.
   :param TextDocumentIdentifier textDocument: The text document.
   :param Position position: The position inside the text document.
   ]#
-  return await self.lspEndpoint.callMethod("textDocument/definition", TextDocumentPositionParams.create(
+  # TextDocumentPositionParams,WorkDoneProgressParams,PartialResultParams
+  return await self.lspEndpoint.callMethod("textDocument/typeDefinition", TextDocumentPositionParams.create(
       textDocument = textDocument, position = position))
   # return [lsp_structs.Location(**l) for l in result_dict]
 
 
-proc signatureHelp*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position): Future[
+proc signatureHelp*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position): Future[
     string]{.async.} =
+  # https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#textDocument_signatureHelp
   #[
-  The signature help request is sent from the client to the server to request signature information at a given cursor position.            
+  The signature help request is sent from the client to the server to request signature information at a given cursor position.
   :param TextDocumentIdentifier textDocument: The text document.
   :param Position position: The position inside the text document.
   ]#
@@ -166,14 +176,15 @@ proc signatureHelp*(self: LspClient, textDocument: TextDocumentIdentifier, posit
   # return lsp_structs.SignatureHelp(**result_dict)
 
 
-proc completion*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position, context: Option[
+proc completion*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position, context: Option[
     CompletionContext]): Future[string]{.async.} =
+  # https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#completionParams
   #[
   The Completion request is sent from the client to the server to compute completion items at a given cursor position.
   :param TextDocumentIdentifier textDocument: The text document.
   :param Position position: The position inside the text document.
-  :param CompletionContext context: The completion context. This is only available if the client specifies 
-                                      to send this using `ClientCapabilities.textDocument.completion.contextSupport === true`
+  :param CompletionContext context: The completion context. This is only available if the client specifies
+    to send this using `ClientCapabilities.textDocument.completion.contextSupport === true`
   ]#
   return await self.lspEndpoint.callMethod("textDocument/completion", CompletionParams.create(
       textDocument = textDocument, position = position, context = context))
@@ -183,15 +194,18 @@ proc completion*(self: LspClient, textDocument: TextDocumentIdentifier, position
   # return [lsp_structs.CompletionItem(**l) for l in result_dict]
 
 
-proc declaration*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position): Future[string]{.async.} =
+proc declaration*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position): Future[
+    string]{.async.} =
+  # https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#declarationParams
   #[
-  The go to declaration request is sent from the client to the server to resolve the declaration location of a 
+  The go to declaration request is sent from the client to the server to resolve the declaration location of a
   symbol at a given text document position.
   The result type LocationLink[] got introduce with version 3.14.0 and depends in the corresponding client
   capability `clientCapabilities.textDocument.declaration.linkSupport`.
   :param TextDocumentItem textDocument: The text document.
   :param Position position: The position inside the text document.
   ]#
+  # TextDocumentPositionParams,WorkDoneProgressParams, PartialResultParams
   return await self.lspEndpoint.callMethod("textDocument/declaration", TextDocumentPositionParams.create(
       textDocument = textDocument, position = position))
   # if "uri" in result_dict:
