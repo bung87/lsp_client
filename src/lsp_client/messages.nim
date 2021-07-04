@@ -632,6 +632,3 @@ jsonSchema:
     workDoneToken ?: int or string #ProgressToken
   PartialResultParams:
     partialResultToken ?: int or string #ProgressToken
-
-  # DefinitionParams extends TextDocumentPositionParams,WorkDoneProgressParams, PartialResultParams 
-  # TypeDefinitionParams extends TextDocumentPositionParams,WorkDoneProgressParams,PartialResultParams
