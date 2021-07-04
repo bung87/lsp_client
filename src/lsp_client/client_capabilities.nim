@@ -1,4 +1,6 @@
 import jsonschema
+type InsertTextMode {.pure.} = enum
+  asIs=1,adjustIndentation
 
 type MarkupKind {.pure.} = enum
   plaintext = 0
@@ -163,7 +165,7 @@ jsonSchema:
     # @since 3.15.0
     tagSupport ?: TagSupportCompletionItemCompletionClientCapabilities
 
-    completionItemKind ?: CompletionItemKind
+    
 
   CompletionClientCapabilities:
     # Whether completion supports dynamic registration.
@@ -172,10 +174,11 @@ jsonSchema:
     # The client supports the following `CompletionItem` specific
     # capabilities.
     completionItem ?: CompletionItemCompletionClientCapabilities
-
+    completionItemKind ?: CompletionItemKind
     # The client supports to send additional context information for a
     # `textDocument/completion` request.
-    ontextSupport ?: bool
+    contextSupport ?: bool
+    insertTextMode?: InsertTextMode # since 3.17.0
 
   HoverClientCapabilities:
     # Whether hover supports dynamic registration.
