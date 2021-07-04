@@ -62,7 +62,7 @@ proc initialized*[E](self: LspClient[E]): Future[void] {.async.} =
     but before the client is sending any other request or notification to the server. The server can use the initialized notification
     for example to dynamically register capabilities. The initialized notification may only be sent once.
     ]#
-  await self.lspEndpoint.sendNotification("initialized")
+  await self.lspEndpoint.sendNotification("initialized", InitializedParams(newJObject()))
 
 
 proc shutdown*[E](self: LspClient[E]): Future[ResponseMessage] {.async.} =
@@ -104,7 +104,7 @@ proc didOpen*[E](self: LspClient[E], textDocument: TextDocumentItem): Future[voi
   await self.lspEndpoint.sendNotification("textDocument/didOpen", DidOpenTextDocumentParams.create(
       textDocument = textDocument))
 
-proc didClose*[E](self: LspClient[E], textDocument: VersionedTextDocumentIdentifier): Future[void]{.async.} =
+proc didClose*[E](self: LspClient[E], textDocument: TextDocumentIdentifier): Future[void]{.async.} =
   await self.lspEndpoint.sendNotification("textDocument/didClose", DidCloseTextDocumentParams.create(
       textDocument = textDocument))
 

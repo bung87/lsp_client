@@ -8,7 +8,7 @@ const CRLF = "\r\n"
 const JSONRPC_VERSION = "2.0"
 
 type
-  GRequest*[I: int|string = int, P] = object
+  GRequest*[I: int|string|void = int, P] = object
     jsonrpc: string
     `method`: string
     id: I
@@ -103,6 +103,15 @@ proc initGRequest*[P: int|string](id: P, `method`: string, jsonrpc = JSONRPC_VER
   result.id = id
   result.method = `method`
   result.jsonrpc = jsonrpc
+
+proc initGRequest*(`method`: string, jsonrpc = JSONRPC_VERSION): GRequest[void, void] =
+  result.method = `method`
+  result.jsonrpc = jsonrpc
+
+proc initGRequest*[T](`method`: string, params: T, jsonrpc = JSONRPC_VERSION): GRequest[void, T] =
+  result.method = `method`
+  result.jsonrpc = jsonrpc
+  result.params = params
 
 proc jRequest*[P: int|string](id: P, `method`: string, jsonrpc = JSONRPC_VERSION): JsonNode{.noInit.} =
   result = newJObject()

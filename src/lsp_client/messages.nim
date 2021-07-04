@@ -5,6 +5,9 @@ import json
 import options
 import sequtils
 include ./client_capabilities
+
+type InitializedParams* = JsonNode
+
 type DocumentUri* = string
 type SymbolTag* = enum
   Deprecated = 1
@@ -368,8 +371,8 @@ jsonSchema:
     workspace ?: WorkspaceCapability
     experimental ?: any
 
-  InitializedParams:
-    DUMMY ?: nil # This is actually an empty object
+  # InitializedParams:
+  #   DUMMY ?: nil # This is actually an empty object
 
   ShowMessageParams:
     "type": int # MessageType

@@ -20,11 +20,9 @@ let docCaps = create(TextDocumentClientCapabilities,
     completionItem = some(CompletionItemCompletionClientCapabilities.create(
       snippetSupport = none(bool),
       commitCharactersSupport = none(bool),
-      # documentationFormat = none(seq[MarkupKind]),
     documentationFormat = some(DocumentationFormat),
     deprecatedSupport = some(true),
     preselectSupport = none(bool),
-    # tagSupport = none(TagSupportCompletionItemCompletionClientCapabilities),
     tagSupport = some(TagSupportCompletionItemCompletionClientCapabilities.create(
       valueSet = TagSupportValueSet
     ))

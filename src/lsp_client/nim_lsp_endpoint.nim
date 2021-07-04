@@ -28,16 +28,19 @@ class(LspNimEndpoint of LspEndpoint):
 
     let written = await self.write(msg[0].addr, msg.len)
     doAssert written == msg.len
-    # echo await self.readError()
+    let id = self.getId()
+    # if id >= 3:
+    #   echo waitFor self.readError()
 
   method sendNotification*(`method`: string): Future[void]{.async.} =
-    let id = self.getId()
-    self.incId()
-    let jo = initGRequest(id = id, `method` = `method`)
+    let jo = initGRequest(`method` = `method`)
     let str = $ % jo
     await self.send(str)
 
-  method sendNotification*[T](`method`: string, params: T): Future[void]{.async.}
+  method sendNotification*[T](`method`: string, params: T): Future[void]{.async.} =
+    let jo = initGRequest(`method` = `method`, params = cast[JsonNode](params))
+    let str = $ % jo
+    await self.send(str)
 
   method callMethod*[T](`method`: string, params: T): Future[string]{.async.} =
     # if not isValid(cast[JsonNode](params),typedesc[type params]):
@@ -47,6 +50,7 @@ class(LspNimEndpoint of LspEndpoint):
     let jo = initGRequest(id = id, `method` = `method`, params = cast[JsonNode](params))
     let str = $ % jo
     result = await self.roundtrip(str)
+
 
   method callMethod*(`method`: string): Future[string]{.async.} =
     # if not isValid(cast[JsonNode](params),typedesc[type params]):
