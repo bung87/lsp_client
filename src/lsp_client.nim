@@ -104,6 +104,13 @@ proc didOpen*[E](self: LspClient[E], textDocument: TextDocumentItem): Future[voi
   await self.lspEndpoint.sendNotification("textDocument/didOpen", DidOpenTextDocumentParams.create(
       textDocument = textDocument))
 
+proc didClose*[E](self: LspClient[E], textDocument: VersionedTextDocumentIdentifier): Future[void]{.async.} =
+  await self.lspEndpoint.sendNotification("textDocument/didClose", DidCloseTextDocumentParams.create(
+      textDocument = textDocument))
+
+proc didSave*[E](self: LspClient[E], textDocument: VersionedTextDocumentIdentifier): Future[void]{.async.} =
+  await self.lspEndpoint.sendNotification("textDocument/didSave", DidCloseTextDocumentParams.create(
+      textDocument = textDocument))
 
 proc didChange*[E](self: LspClient[E], textDocument: VersionedTextDocumentIdentifier, contentChanges: seq[
     TextDocumentContentChangeEvent]): Future[void]{.async.} =
@@ -213,17 +220,8 @@ proc declaration*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, p
       partialResultToken = partialResultToken))
   return DeclarationResponse(resp.parseJson())
 
-# proc definition*(self:LspClient, textDocument:TextDocumentIdentifier, position:Position):string =
-  #[
-  The go to definition request is sent from the client to the server to resolve the declaration location of a
-  symbol at a given text document position.
-  The result type LocationLink[] got introduce with version 3.14.0 and depends in the corresponding client
-  capability `clientCapabilities.textDocument.declaration.linkSupport`.
-  :param TextDocumentIdentifier textDocument: The text document.
-  :param Position position: The position inside the text document.
-  ]#
-  # return self.lspEndpoint.callMethod("textDocument/definition", TextDocumentPositionParams.create(textDocument=textDocument, position=position))
-  # if "uri" in result_dict:
-  #     return lsp_structs.Location(**result_dict)
-
-  # return [lsp_structs.Location(**l) if "uri" in l else lsp_structs.LinkLocation(**l) for l in result_dict]
+proc rename*(self: LspClient, textDocument: TextDocumentIdentifier, position: Position, newName: string,
+    workDoneToken = none(string)): Future[RenameResponse]{.async.} =
+  let resp = self.lspEndpoint.callMethod("textDocument/rename", RenameParams.create(textDocument = textDocument,
+      position = position, newName = newName, workDoneToken = workDoneToken))
+  return RenameResponse(resp.parseJson())

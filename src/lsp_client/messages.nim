@@ -288,6 +288,8 @@ jsonSchema:
     "result" ?: CompletionItem[] or CompletionList or nil
   DeclarationResponse extends AbstractResponseMessage:
     "result" ?: Location or Location[] or LocationLink[] or nil
+  RenameResponse extends AbstractResponseMessage:
+    "result" ?: WorkspaceEdit or nil
   InitializeError:
     retry: bool
 
@@ -664,6 +666,7 @@ jsonSchema:
     textDocument: TextDocumentIdentifier
     position: Position
     newName: string
+    workDoneToken ?: int or string #ProgressToken
 
   WorkDoneProgressParams:
     workDoneToken ?: int or string #ProgressToken
