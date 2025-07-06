@@ -6,7 +6,7 @@ import sequtils
 type InsertTextMode* {.pure.} = enum
   asIs = 1, adjustIndentation
 
-type MarkupKind {.pure.} = enum
+type MarkupKind* {.pure.} = enum
   plaintext = 0
   markdown = 1
 
