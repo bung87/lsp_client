@@ -2,7 +2,7 @@ include lsp_client
 include lsp_client / nim_lsp_endpoint
 import jsonschema
 import os
-import asyncdispatch
+import chronos
 include moe_doc_caps
 
 jsonSchema:
@@ -10,7 +10,7 @@ jsonSchema:
     name: string
     version ?: string
 
-let endPoint = newLspNimEndpoint()
+let endPoint = LspNimEndpoint.new()
 let client = newLspClient(endPoint)
 
 let caps = create(ClientCapabilities,

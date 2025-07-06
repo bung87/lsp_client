@@ -1,9 +1,8 @@
 import lsp_client/lsp_types
 include lsp_client/messages
 import options
-import asyncdispatch
 import json
-
+import chronos
 
 # type TraceValue = enum
 #   off="off",messages="messages",verbose="verbose"
@@ -26,14 +25,14 @@ proc initialize*[E, T, P](self: LspClient[E], processId: P, rootPath: Option[str
     initializationOptions: Option[T], capabilities: ClientCapabilities, trace: Option[TraceValue],
     workspaceFolders: Option[seq[WorkspaceFolder]]): Future[InitializeResponse]{.async.} =
   #[
-    The initialize request is sent as the first request from the client to the server. If the server receives a request or notification 
+    The initialize request is sent as the first request from the client to the server. If the server receives a request or notification
     before the initialize request it should act as follows:
     1. For a request the response should be an error with code: -32002. The message can be picked by the server.
     2. Notifications should be dropped, except for the exit notification. This will allow the exit of a server without an initialize request.
-    
-    Until the server has responded to the initialize request with an InitializeResult, the client must not send any additional requests or 
-    notifications to the server. In addition the server is not allowed to send any requests or notifications to the client until it has responded 
-    with an InitializeResult, with the exception that during the initialize request the server is allowed to send the notifications window/showMessage, 
+
+    Until the server has responded to the initialize request with an InitializeResult, the client must not send any additional requests or
+    notifications to the server. In addition the server is not allowed to send any requests or notifications to the client until it has responded
+    with an InitializeResult, with the exception that during the initialize request the server is allowed to send the notifications window/showMessage,
     window/logMessage and telemetry/event as well as the window/showMessageRequest request to the client.
     The initialize request may only be sent once.
     :param int processId: The process Id of the parent process that started the server. Is null if the process has not been started by another process.
@@ -47,7 +46,7 @@ proc initialize*[E, T, P](self: LspClient[E], processId: P, rootPath: Option[str
     :param list workspaceFolders: The workspace folders configured in the client when the server starts. This property is only available if the client supports workspace folders.
                                     It can be `null` if the client supports workspace folders but none are configured.
     ]#
-  self.lspEndpoint.start()
+  await self.lspEndpoint.startProcess()
 
   let resp = await self.lspEndpoint.callMethod("initialize", InitializeParams.create(processId = processId,
       rootPath = rootPath, rootUri = rootUri, initializationOptions = cast[Option[json.JsonNode]](
@@ -67,10 +66,10 @@ proc initialized*[E](self: LspClient[E]): Future[void] {.async.} =
 
 proc shutdown*[E](self: LspClient[E]): Future[ResponseMessage] {.async.} =
   #[
-   It asks the server to shut down, but to not exit 
+   It asks the server to shut down, but to not exit
    (otherwise the response might not be delivered correctly to the client)
   ]#
-  self.lspEndpoint.stop()
+  self.lspEndpoint.stopProcess()
   let resp = await self.lspEndpoint.callMethod("shutdown")
   return ResponseMessage(resp.parseJson)
 
@@ -91,13 +90,13 @@ proc exit*[E](self: LspClient[E]): Future[int] {.async.} =
 proc didOpen*[E](self: LspClient[E], textDocument: TextDocumentItem): Future[void]{.async.} =
   #[
   The document open notification is sent from the client to the server to signal newly opened text documents. The document's truth is
-  now managed by the client and the server must not try to read the document's truth using the document's uri. Open in this sense 
+  now managed by the client and the server must not try to read the document's truth using the document's uri. Open in this sense
   means it is managed by the client. It doesn't necessarily mean that its content is presented in an editor. An open notification must
-  not be sent more than once without a corresponding close notification send before. This means open and close notification must be 
-  balanced and the max open count for a particular textDocument is one. Note that a server's ability to fulfill requests is independent 
+  not be sent more than once without a corresponding close notification send before. This means open and close notification must be
+  balanced and the max open count for a particular textDocument is one. Note that a server's ability to fulfill requests is independent
   of whether a text document is open or closed.
-  The DidOpenTextDocumentParams contain the language id the document is associated with. If the language Id of a document changes, the 
-  client needs to send a textDocument/didClose to the server followed by a textDocument/didOpen with the new language id if the server 
+  The DidOpenTextDocumentParams contain the language id the document is associated with. If the language Id of a document changes, the
+  client needs to send a textDocument/didClose to the server followed by a textDocument/didOpen with the new language id if the server
   handles the new language id as well.
   :param TextDocumentItem textDocument: The document that was opened.
   ]#
