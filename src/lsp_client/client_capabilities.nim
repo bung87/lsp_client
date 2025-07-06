@@ -1,23 +1,27 @@
-import jsonschema
-type InsertTextMode {.pure.} = enum
+import messageenums
+import jsonschema, json
+import options
+import sequtils
+
+type InsertTextMode* {.pure.} = enum
   asIs = 1, adjustIndentation
 
 type MarkupKind {.pure.} = enum
   plaintext = 0
   markdown = 1
 
-type ResourceOperationKind {.pure.} = enum
+type ResourceOperationKind* {.pure.} = enum
   create = 0
   rename = 1
   delete = 2
 
-type FailureHandlingKind {.pure.} = enum
+type FailureHandlingKind* {.pure.} = enum
   abort = 0
   transactional = 1
   undo = 2
   textOnlyTransactional = 3
 
-type CompletionItemTag {.pure.} = enum
+type CompletionItemTag* {.pure.} = enum
   # Render a completion as obsolete, usually using a strike-out.
   Deprecated = 1
 
