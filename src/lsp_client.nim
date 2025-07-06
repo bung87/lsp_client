@@ -6,7 +6,7 @@ import chronos
 
 # type TraceValue = enum
 #   off="off",messages="messages",verbose="verbose"
-type TraceValue = string
+type TraceValue* = string
 type
   LspClientObj[E] = object of RootObj
     lspEndpoint: E

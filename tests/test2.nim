@@ -1,5 +1,5 @@
-include lsp_client
-include lsp_client / nim_lsp_endpoint
+import lsp_client
+import lsp_client / nim_lsp_endpoint
 import jsonschema
 import os
 import chronos
