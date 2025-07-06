@@ -1,9 +1,9 @@
 import lsp_client
 import lsp_client / nim_lsp_endpoint
+include moe_doc_caps
 import jsonschema
 import os
 import chronos
-include moe_doc_caps
 
 jsonSchema:
   ClientInfo:

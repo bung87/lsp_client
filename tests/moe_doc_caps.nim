@@ -1,5 +1,7 @@
-# include lsp_client
 import sequtils
+include lsp_client
+
+
 const TagSupportValueSet = {low(CompletionItemTag) .. high(
     CompletionItemTag)}.toSeq
 const DocumentationFormat = {low(MarkupKind) .. high(MarkupKind)}.toSeq
