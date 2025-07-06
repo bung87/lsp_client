@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.3.3"
+version       = "0.3.5"
 author        = "bung87"
 description   = "lsp client"
 license       = "MIT"
