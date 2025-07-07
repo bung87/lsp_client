@@ -11,9 +11,9 @@ import std/[strformat, json, options, strutils]
 
 # Test configuration
 const
-  TEST_PROJECT_DIR = "tests/test_project"
-  MAIN_FILE_PATH = TEST_PROJECT_DIR & "/src/main.nim"
-  TYPES_FILE_PATH = TEST_PROJECT_DIR & "/src/types.nim" 
+  TEST_PROJECT_DIR = currentSourcePath.parentDir() / "test_project"
+  MAIN_FILE_PATH = TEST_PROJECT_DIR / "src/main.nim"
+  TYPES_FILE_PATH = TEST_PROJECT_DIR / "src/types.nim" 
 
 proc runSimpleLspTest() {.async.} =
   ## Runs a simple LSP test suite
@@ -24,8 +24,8 @@ proc runSimpleLspTest() {.async.} =
   let endPoint = LspNimEndpoint.new()
   let client = newLspClient(endPoint)
   
-  let mainUri = "file://" & getCurrentDir() / MAIN_FILE_PATH
-  let typesUri = "file://" & getCurrentDir() / TYPES_FILE_PATH
+  let mainUri = "file://" & MAIN_FILE_PATH
+  let typesUri = "file://" & TYPES_FILE_PATH
   
   echo &"Testing with files:"
   echo &"  Main: {mainUri}"
@@ -45,7 +45,7 @@ proc runSimpleLspTest() {.async.} =
       initializationOptions = none(JsonNode),
       processId = getCurrentProcessId(),
       rootPath = none(string),
-      rootUri = "file://" & getCurrentDir() / TEST_PROJECT_DIR,
+      rootUri = "file://" & TEST_PROJECT_DIR,
       capabilities = caps,
       trace = none(string),
       workspaceFolders = none(seq[WorkspaceFolder])
@@ -83,24 +83,26 @@ proc runSimpleLspTest() {.async.} =
     let mainSymbols = await client.documentSymbol(
       textDocument = TextDocumentIdentifier.create(uri = mainUri)
     )
-    echo &"   ✓ Found {mainSymbols.JsonNode.len} symbols in main.nim"
+    doAssert mainSymbols["result"].isSome and mainSymbols["result"].get.len > 0, "Should find symbols in main.nim"
+    echo &"   ✓ Found {mainSymbols[\"result\"].get.len} symbols in main.nim"
     
     let typesSymbols = await client.documentSymbol(
       textDocument = TextDocumentIdentifier.create(uri = typesUri)
     )
-    echo &"   ✓ Found {typesSymbols.JsonNode.len} symbols in types.nim"
+    doAssert typesSymbols["result"].isSome and typesSymbols["result"].get.len > 0, "Should find symbols in types.nim"
+    echo &"   ✓ Found {typesSymbols[\"result\"].get.len} symbols in types.nim"
     
     # Test hover
     echo "\n4. Testing hover..."
     let userHover = await client.hover(
       textDocument = TextDocumentIdentifier.create(uri = typesUri),
-      position = Position.create(line = 15, character = 4),
+      position = Position.create(line = 14, character = 4),
       workDoneToken = none(string)
     )
-    if userHover.JsonNode.hasKey("contents"):
-      echo "   ✓ Hover on User type successful"
-    else:
-      echo "   ✗ Hover on User type failed"
+    doAssert userHover["result"].isSome, "Hover on User type should return a result"
+    let hoverData = userHover["result"].get
+    doAssert hoverData.hasKey("contents"), "Hover result should have contents"
+    echo "   ✓ Hover on User type successful"
     
     # Test completion
     echo "\n5. Testing completion..."
@@ -110,11 +112,17 @@ proc runSimpleLspTest() {.async.} =
       workDoneToken = none(string),
       context = none(CompletionContext)
     )
-    if completion.JsonNode.hasKey("items"):
-      let items = completion.JsonNode["items"]
-      echo &"   ✓ Found {items.len} completion items"
-    else:
-      echo "   ✗ No completion items found"
+    doAssert completion["result"].isSome, "Completion should return a result"
+    let completionData = completion["result"].get
+    var itemCount = 0
+    if completionData.kind == JObject and completionData.hasKey("items"):
+      itemCount = completionData["items"].len
+      let isIncomplete = completionData["isIncomplete"].getBool()
+      echo &"   ✓ Found {itemCount} completion items (incomplete: {isIncomplete})"
+    elif completionData.kind == JArray:
+      itemCount = completionData.len
+      echo &"   ✓ Found {itemCount} completion items"
+    doAssert itemCount > 0, "Should find completion items"
     
     # Test definition
     echo "\n6. Testing go-to-definition..."
@@ -124,10 +132,8 @@ proc runSimpleLspTest() {.async.} =
       workDoneToken = none(string),
       partialResultToken = none(string)
     )
-    if definition.JsonNode.len > 0:
-      echo "   ✓ Definition found"
-    else:
-      echo "   ✗ Definition not found"
+    doAssert definition["result"].isSome and definition["result"].get.len > 0, "Should find definition"
+    echo &"   ✓ Found {definition[\"result\"].get.len} definition location(s)"
     
     # Test signature help
     echo "\n7. Testing signature help..."
@@ -137,11 +143,17 @@ proc runSimpleLspTest() {.async.} =
       workDoneToken = none(string),
       context = none(SignatureHelpContext)
     )
-    if signature.JsonNode.hasKey("signatures"):
-      let signatures = signature.JsonNode["signatures"]
+    doAssert signature["result"].isSome, "Signature help should return a result"
+    let signatureData = signature["result"].get
+    if signatureData.kind != JNull and signatureData.hasKey("signatures"):
+      let signatures = signatureData["signatures"]
       echo &"   ✓ Found {signatures.len} signature(s)"
+      if signatureData.hasKey("activeSignature") and signatureData["activeSignature"].kind != JNull:
+        echo &"     Active signature: {signatureData[\"activeSignature\"].getInt()}"
+      if signatureData.hasKey("activeParameter") and signatureData["activeParameter"].kind != JNull:
+        echo &"     Active parameter: {signatureData[\"activeParameter\"].getInt()}"
     else:
-      echo "   ✗ No signatures found"
+      echo "   ⚠ No signatures available (null result)"
     
     # Test rename (read-only)
     echo "\n8. Testing rename..."
@@ -151,10 +163,10 @@ proc runSimpleLspTest() {.async.} =
       newName = "testUsers",
       workDoneToken = none(string)
     )
-    if rename.JsonNode.hasKey("changes") or rename.JsonNode.hasKey("documentChanges"):
-      echo "   ✓ Rename operation returned changes"
-    else:
-      echo "   ✗ Rename operation failed"
+    doAssert rename["result"].isSome, "Rename should return a result"
+    let renameData = rename["result"].get
+    doAssert renameData.hasKey("changes") or renameData.hasKey("documentChanges"), "Rename should return changes or documentChanges"
+    echo "   ✓ Rename operation returned changes"
     
     # Test document changes
     echo "\n9. Testing document changes..."
@@ -186,28 +198,13 @@ proc runSimpleLspTest() {.async.} =
     echo &"   ✓ Exit code: {exitCode}"
     
     echo "\n" & "=".repeat(40)
-    echo "✓ Simple LSP test completed successfully!"
-    echo "\nTest Summary:"
-    echo "- LSP session initialization: ✓"
-    echo "- File operations (open/close): ✓" 
-    echo "- Document symbols: ✓"
-    echo "- Hover information: ✓"
-    echo "- Code completion: ✓"
-    echo "- Go-to-definition: ✓"
-    echo "- Signature help: ✓"
-    echo "- Rename operation: ✓"
-    echo "- Document changes: ✓"
-    echo "- Session cleanup: ✓"
+    echo "✅ All LSP tests passed successfully!"
     
   except Exception as e:
     echo &"\n✗ Test failed with error: {e.msg}"
     echo "Stacktrace:"
-    echo e.getStackTrace()
+    echo getStackTrace(e)
 
-# Main execution
-proc main() {.async.} =
-  ## Main test runner
-  await runSimpleLspTest()
-
+# Run the test when this module is executed
 when isMainModule:
-  waitFor main() 
+  waitFor runSimpleLspTest() 

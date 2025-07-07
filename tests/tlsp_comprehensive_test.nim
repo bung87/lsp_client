@@ -149,12 +149,9 @@ proc testHover(ctx: LspTestContext) {.async.} =
     position = Position.create(line = 14, character = 4),
     workDoneToken = none(string)
   )
-  if userHover.JsonNode.hasKey("result") and userHover.JsonNode["result"].hasKey("contents"):
-    echo "  ✓ User type hover successful"
-    echo &"    Content: {userHover.JsonNode[\"result\"][\"contents\"]}"
-  else:
-    echo "  ✗ User type hover failed"
-    echo &"    Response: {userHover.JsonNode}"
+  doAssert userHover.JsonNode.hasKey("result") and userHover.JsonNode["result"].hasKey("contents"), "User type hover should return contents"
+  echo "  ✓ User type hover successful"
+  echo &"    Content: {userHover.JsonNode[\"result\"][\"contents\"]}"
   
   # Test hover on newUser function in types.nim (line 54, around "newUser")
   echo "Testing hover on newUser function:"
@@ -163,12 +160,9 @@ proc testHover(ctx: LspTestContext) {.async.} =
     position = Position.create(line = 54, character = 5),
     workDoneToken = none(string)
   )
-  if newUserHover.JsonNode.hasKey("result") and newUserHover.JsonNode["result"].hasKey("contents"):
-    echo "  ✓ newUser function hover successful"
-    echo &"    Content: {newUserHover.JsonNode[\"result\"][\"contents\"]}"
-  else:
-    echo "  ✗ newUser function hover failed"
-    echo &"    Response: {newUserHover.JsonNode}"
+  doAssert newUserHover.JsonNode.hasKey("result") and newUserHover.JsonNode["result"].hasKey("contents"), "newUser function hover should return contents"
+  echo "  ✓ newUser function hover successful"
+  echo &"    Content: {newUserHover.JsonNode[\"result\"][\"contents\"]}"
   
   # Test hover on Status enum in types.nim (line 7, around "Status")
   echo "Testing hover on Status enum:"
@@ -177,12 +171,9 @@ proc testHover(ctx: LspTestContext) {.async.} =
     position = Position.create(line = 7, character = 4),
     workDoneToken = none(string)
   )
-  if statusHover.JsonNode.hasKey("result") and statusHover.JsonNode["result"].hasKey("contents"):
-    echo "  ✓ Status enum hover successful"
-    echo &"    Content: {statusHover.JsonNode[\"result\"][\"contents\"]}"
-  else:
-    echo "  ✗ Status enum hover failed"
-    echo &"    Response: {statusHover.JsonNode}"
+  doAssert statusHover.JsonNode.hasKey("result") and statusHover.JsonNode["result"].hasKey("contents"), "Status enum hover should return contents"
+  echo "  ✓ Status enum hover successful"
+  echo &"    Content: {statusHover.JsonNode[\"result\"][\"contents\"]}"
   
   echo "✓ Hover tests completed"
 
@@ -198,10 +189,8 @@ proc testDefinition(ctx: LspTestContext) {.async.} =
     workDoneToken = none(string),
     partialResultToken = none(string)
   )
-  if userDef.JsonNode.len > 0:
-    echo "  ✓ User type definition found"
-  else:
-    echo "  ✗ User type definition not found"
+  doAssert userDef.JsonNode.len > 0, "Should find User type definition"
+  echo "  ✓ User type definition found"
   
   # Test definition of Status enum used in utils.nim (line 30, around "Status")
   echo "Testing definition of Status enum in utils.nim:"
@@ -211,10 +200,8 @@ proc testDefinition(ctx: LspTestContext) {.async.} =
     workDoneToken = none(string),
     partialResultToken = none(string)
   )
-  if statusDef.JsonNode.len > 0:
-    echo "  ✓ Status enum definition found"
-  else:
-    echo "  ✗ Status enum definition not found"
+  doAssert statusDef.JsonNode.len > 0, "Should find Status enum definition"
+  echo "  ✓ Status enum definition found"
   
   echo "✓ Definition tests completed"
 
@@ -230,21 +217,19 @@ proc testCompletion(ctx: LspTestContext) {.async.} =
     workDoneToken = none(string),
     context = none(CompletionContext)
   )
-  if statusCompletion.JsonNode.kind == JObject and statusCompletion.JsonNode.hasKey("result"):
-    let result = statusCompletion.JsonNode["result"]
-    if result.kind == JObject and result.hasKey("items"):
-      let items = result["items"]
-      echo &"  ✓ Found {items.len} completion items"
-    elif result.kind == JArray:
-      echo &"  ✓ Found {result.len} completion items"
-    elif result.kind == JNull:
-      echo "  ⚠ No completion items available (null result)"
-    else:
-      echo "  ✗ Unexpected completion result format"
-      echo &"    Result: {result}"
+  doAssert statusCompletion.JsonNode.kind == JObject and statusCompletion.JsonNode.hasKey("result"), "Status completion should return a result object"
+  let result = statusCompletion.JsonNode["result"]
+  var itemCount = 0
+  if result.kind == JObject and result.hasKey("items"):
+    itemCount = result["items"].len
+  elif result.kind == JArray:
+    itemCount = result.len
+  elif result.kind == JNull:
+    echo "  ⚠ No completion items available (null result)"
   else:
-    echo "  ✗ No valid result in completion response"
-    echo &"    Response: {statusCompletion.JsonNode}"
+    doAssert false, &"Unexpected completion result format: {result}"
+  if itemCount > 0:
+    echo &"  ✓ Found {itemCount} completion items"
   
   # Test completion in main.nim for user variable (line 20, after "users.")
   echo "Testing completion on user object members:"
@@ -254,21 +239,19 @@ proc testCompletion(ctx: LspTestContext) {.async.} =
     workDoneToken = none(string),
     context = none(CompletionContext)
   )
-  if userCompletion.JsonNode.kind == JObject and userCompletion.JsonNode.hasKey("result"):
-    let result = userCompletion.JsonNode["result"]
-    if result.kind == JObject and result.hasKey("items"):
-      let items = result["items"]
-      echo &"  ✓ Found {items.len} user member completion items"
-    elif result.kind == JArray:
-      echo &"  ✓ Found {result.len} user member completion items"
-    elif result.kind == JNull:
-      echo "  ⚠ No user member completion items available (null result)"
-    else:
-      echo "  ✗ Unexpected user completion result format"
-      echo &"    Result: {result}"
+  doAssert userCompletion.JsonNode.kind == JObject and userCompletion.JsonNode.hasKey("result"), "User completion should return a result object"
+  let userResult = userCompletion.JsonNode["result"]
+  var userItemCount = 0
+  if userResult.kind == JObject and userResult.hasKey("items"):
+    userItemCount = userResult["items"].len
+  elif userResult.kind == JArray:
+    userItemCount = userResult.len
+  elif userResult.kind == JNull:
+    echo "  ⚠ No user member completion items available (null result)"
   else:
-    echo "  ✗ No valid result in user completion response"
-    echo &"    Response: {userCompletion.JsonNode}"
+    doAssert false, &"Unexpected user completion result format: {userResult}"
+  if userItemCount > 0:
+    echo &"  ✓ Found {userItemCount} user member completion items"
   
   echo "✓ Completion tests completed"
 
@@ -284,19 +267,16 @@ proc testSignatureHelp(ctx: LspTestContext) {.async.} =
     workDoneToken = none(string),
     context = none(SignatureHelpContext)
   )
-  if newUserSig.JsonNode.kind == JObject and newUserSig.JsonNode.hasKey("result"):
-    let result = newUserSig.JsonNode["result"]
-    if result.kind == JObject and result.hasKey("signatures"):
-      let signatures = result["signatures"]
-      echo &"  ✓ Found {signatures.len} signature(s)"
-    elif result.kind == JNull:
-      echo "  ⚠ No signatures available (null result)"
-    else:
-      echo "  ✗ Unexpected signature help result format"
-      echo &"    Result: {result}"
+  doAssert newUserSig.JsonNode.kind == JObject and newUserSig.JsonNode.hasKey("result"), "newUser signature help should return a result object"
+  let result = newUserSig.JsonNode["result"]
+  if result.kind == JObject and result.hasKey("signatures"):
+    let signatures = result["signatures"]
+    echo &"  ✓ Found {signatures.len} signature(s)"
+  elif result.kind == JNull:
+    echo "  ⚠ No signatures available (null result)"
   else:
-    echo "  ✗ No valid result in signature help response"
-    echo &"    Response: {newUserSig.JsonNode}"
+    echo "  ⚠ Unexpected signature help result format"
+    echo &"    Result: {result}"
   
   # Test signature help for area function
   echo "Testing signature help for area function:"
@@ -306,19 +286,16 @@ proc testSignatureHelp(ctx: LspTestContext) {.async.} =
     workDoneToken = none(string),
     context = none(SignatureHelpContext)
   )
-  if areaSig.JsonNode.kind == JObject and areaSig.JsonNode.hasKey("result"):
-    let result = areaSig.JsonNode["result"]
-    if result.kind == JObject and result.hasKey("signatures"):
-      let signatures = result["signatures"]
-      echo &"  ✓ Found {signatures.len} signature(s) for area function"
-    elif result.kind == JNull:
-      echo "  ⚠ No signatures available for area function (null result)"
-    else:
-      echo "  ✗ Unexpected area function signature help result format"
-      echo &"    Result: {result}"
+  doAssert areaSig.JsonNode.kind == JObject and areaSig.JsonNode.hasKey("result"), "area function signature help should return a result object"
+  let areaResult = areaSig.JsonNode["result"]
+  if areaResult.kind == JObject and areaResult.hasKey("signatures"):
+    let signatures = areaResult["signatures"]
+    echo &"  ✓ Found {signatures.len} signature(s) for area function"
+  elif areaResult.kind == JNull:
+    echo "  ⚠ No signatures available for area function (null result)"
   else:
-    echo "  ✗ No valid result in area function signature help response"
-    echo &"    Response: {areaSig.JsonNode}"
+    echo "  ⚠ Unexpected area function signature help result format"
+    echo &"    Result: {areaResult}"
   
   echo "✓ Signature help tests completed"
 
@@ -334,10 +311,8 @@ proc testTypeDefinition(ctx: LspTestContext) {.async.} =
     workDoneToken = none(string),
     partialResultToken = none(string)
   )
-  if userTypeDef.JsonNode.len > 0:
-    echo "  ✓ User variable type definition found"
-  else:
-    echo "  ✗ User variable type definition not found"
+  doAssert userTypeDef.JsonNode.len > 0, "Should find user variable type definition"
+  echo "  ✓ User variable type definition found"
   
   echo "✓ Type definition tests completed"
 
@@ -353,10 +328,8 @@ proc testDeclaration(ctx: LspTestContext) {.async.} =
     workDoneToken = none(string),
     partialResultToken = none(string)
   )
-  if typesDecl.JsonNode.len > 0:
-    echo "  ✓ Types import declaration found"
-  else:
-    echo "  ✗ Types import declaration not found"
+  doAssert typesDecl.JsonNode.len > 0, "Should find types import declaration"
+  echo "  ✓ Types import declaration found"
   
   echo "✓ Declaration tests completed"
 
@@ -372,11 +345,8 @@ proc testRename(ctx: LspTestContext) {.async.} =
     newName = "testUsers",
     workDoneToken = none(string)
   )
-  if renameResp.JsonNode.hasKey("result") and (renameResp.JsonNode["result"].hasKey("changes") or renameResp.JsonNode["result"].hasKey("documentChanges")):
-    echo "  ✓ Rename operation returned changes"
-  else:
-    echo "  ✗ Rename operation failed"
-    echo &"    Response: {renameResp.JsonNode}"
+  doAssert renameResp.JsonNode.hasKey("result") and (renameResp.JsonNode["result"].hasKey("changes") or renameResp.JsonNode["result"].hasKey("documentChanges")), "Rename operation should return changes"
+  echo "  ✓ Rename operation returned changes"
   
   echo "✓ Rename tests completed"
 
@@ -453,12 +423,7 @@ proc runComprehensiveTest() {.async.} =
     await shutdownLsp(ctx)
     
     echo "\n" & "=".repeat(60)
-    echo "✓ Comprehensive LSP test completed successfully!"
-    echo "\nTest Summary:"
-    echo "- All LSP methods tested with proper GC safety"
-    echo "- No global variables used"
-    echo "- Context properly passed between functions"
-    echo "- Complete session lifecycle validated"
+    echo "✅ All comprehensive LSP tests passed successfully!"
     
   except Exception as e:
     echo &"\n✗ Test failed with error: {e.msg}"
