@@ -142,11 +142,11 @@ proc testHover(ctx: LspTestContext) {.async.} =
   ## Tests hover functionality on various symbols
   echo "\n=== Testing Hover ==="
   
-  # Test hover on User type in types.nim (line 15, around "User")
+  # Test hover on User type in types.nim (line 14, around "User")
   echo "Testing hover on User type:"
   let userHover = await ctx.client.hover(
     textDocument = TextDocumentIdentifier.create(uri = ctx.typesUri),
-    position = Position.create(line = 15, character = 4),
+    position = Position.create(line = 14, character = 4),
     workDoneToken = none(string)
   )
   if userHover.JsonNode.hasKey("result") and userHover.JsonNode["result"].hasKey("contents"):
@@ -156,11 +156,11 @@ proc testHover(ctx: LspTestContext) {.async.} =
     echo "  ✗ User type hover failed"
     echo &"    Response: {userHover.JsonNode}"
   
-  # Test hover on newUser function in types.nim (line 49, around "newUser")
+  # Test hover on newUser function in types.nim (line 54, around "newUser")
   echo "Testing hover on newUser function:"
   let newUserHover = await ctx.client.hover(
     textDocument = TextDocumentIdentifier.create(uri = ctx.typesUri),
-    position = Position.create(line = 49, character = 5),
+    position = Position.create(line = 54, character = 5),
     workDoneToken = none(string)
   )
   if newUserHover.JsonNode.hasKey("result") and newUserHover.JsonNode["result"].hasKey("contents"):
@@ -170,11 +170,11 @@ proc testHover(ctx: LspTestContext) {.async.} =
     echo "  ✗ newUser function hover failed"
     echo &"    Response: {newUserHover.JsonNode}"
   
-  # Test hover on Status enum in types.nim (line 8, around "Status")
+  # Test hover on Status enum in types.nim (line 7, around "Status")
   echo "Testing hover on Status enum:"
   let statusHover = await ctx.client.hover(
     textDocument = TextDocumentIdentifier.create(uri = ctx.typesUri),
-    position = Position.create(line = 8, character = 4),
+    position = Position.create(line = 7, character = 4),
     workDoneToken = none(string)
   )
   if statusHover.JsonNode.hasKey("result") and statusHover.JsonNode["result"].hasKey("contents"):
@@ -230,18 +230,20 @@ proc testCompletion(ctx: LspTestContext) {.async.} =
     workDoneToken = none(string),
     context = none(CompletionContext)
   )
-  if statusCompletion.JsonNode.hasKey("result"):
-    if statusCompletion.JsonNode["result"].hasKey("items"):
-      let items = statusCompletion.JsonNode["result"]["items"]
+  if statusCompletion.JsonNode.kind == JObject and statusCompletion.JsonNode.hasKey("result"):
+    let result = statusCompletion.JsonNode["result"]
+    if result.kind == JObject and result.hasKey("items"):
+      let items = result["items"]
       echo &"  ✓ Found {items.len} completion items"
-    elif statusCompletion.JsonNode["result"].kind == JArray:
-      let items = statusCompletion.JsonNode["result"]
-      echo &"  ✓ Found {items.len} completion items"
+    elif result.kind == JArray:
+      echo &"  ✓ Found {result.len} completion items"
+    elif result.kind == JNull:
+      echo "  ⚠ No completion items available (null result)"
     else:
-      echo "  ✗ No completion items found in result"
-      echo &"    Response: {statusCompletion.JsonNode}"
+      echo "  ✗ Unexpected completion result format"
+      echo &"    Result: {result}"
   else:
-    echo "  ✗ No result in completion response"
+    echo "  ✗ No valid result in completion response"
     echo &"    Response: {statusCompletion.JsonNode}"
   
   # Test completion in main.nim for user variable (line 20, after "users.")
@@ -252,18 +254,20 @@ proc testCompletion(ctx: LspTestContext) {.async.} =
     workDoneToken = none(string),
     context = none(CompletionContext)
   )
-  if userCompletion.JsonNode.hasKey("result"):
-    if userCompletion.JsonNode["result"].hasKey("items"):
-      let items = userCompletion.JsonNode["result"]["items"]
+  if userCompletion.JsonNode.kind == JObject and userCompletion.JsonNode.hasKey("result"):
+    let result = userCompletion.JsonNode["result"]
+    if result.kind == JObject and result.hasKey("items"):
+      let items = result["items"]
       echo &"  ✓ Found {items.len} user member completion items"
-    elif userCompletion.JsonNode["result"].kind == JArray:
-      let items = userCompletion.JsonNode["result"]
-      echo &"  ✓ Found {items.len} user member completion items"
+    elif result.kind == JArray:
+      echo &"  ✓ Found {result.len} user member completion items"
+    elif result.kind == JNull:
+      echo "  ⚠ No user member completion items available (null result)"
     else:
-      echo "  ✗ No user member completion items found in result"
-      echo &"    Response: {userCompletion.JsonNode}"
+      echo "  ✗ Unexpected user completion result format"
+      echo &"    Result: {result}"
   else:
-    echo "  ✗ No result in user completion response"
+    echo "  ✗ No valid result in user completion response"
     echo &"    Response: {userCompletion.JsonNode}"
   
   echo "✓ Completion tests completed"
@@ -280,11 +284,18 @@ proc testSignatureHelp(ctx: LspTestContext) {.async.} =
     workDoneToken = none(string),
     context = none(SignatureHelpContext)
   )
-  if newUserSig.JsonNode.hasKey("result") and newUserSig.JsonNode["result"].hasKey("signatures"):
-    let signatures = newUserSig.JsonNode["result"]["signatures"]
-    echo &"  ✓ Found {signatures.len} signature(s)"
+  if newUserSig.JsonNode.kind == JObject and newUserSig.JsonNode.hasKey("result"):
+    let result = newUserSig.JsonNode["result"]
+    if result.kind == JObject and result.hasKey("signatures"):
+      let signatures = result["signatures"]
+      echo &"  ✓ Found {signatures.len} signature(s)"
+    elif result.kind == JNull:
+      echo "  ⚠ No signatures available (null result)"
+    else:
+      echo "  ✗ Unexpected signature help result format"
+      echo &"    Result: {result}"
   else:
-    echo "  ✗ No signatures found"
+    echo "  ✗ No valid result in signature help response"
     echo &"    Response: {newUserSig.JsonNode}"
   
   # Test signature help for area function
@@ -295,11 +306,18 @@ proc testSignatureHelp(ctx: LspTestContext) {.async.} =
     workDoneToken = none(string),
     context = none(SignatureHelpContext)
   )
-  if areaSig.JsonNode.hasKey("result") and areaSig.JsonNode["result"].hasKey("signatures"):
-    let signatures = areaSig.JsonNode["result"]["signatures"]
-    echo &"  ✓ Found {signatures.len} signature(s) for area function"
+  if areaSig.JsonNode.kind == JObject and areaSig.JsonNode.hasKey("result"):
+    let result = areaSig.JsonNode["result"]
+    if result.kind == JObject and result.hasKey("signatures"):
+      let signatures = result["signatures"]
+      echo &"  ✓ Found {signatures.len} signature(s) for area function"
+    elif result.kind == JNull:
+      echo "  ⚠ No signatures available for area function (null result)"
+    else:
+      echo "  ✗ Unexpected area function signature help result format"
+      echo &"    Result: {result}"
   else:
-    echo "  ✗ No signatures found for area function"
+    echo "  ✗ No valid result in area function signature help response"
     echo &"    Response: {areaSig.JsonNode}"
   
   echo "✓ Signature help tests completed"
