@@ -3,6 +3,8 @@ import jsonschema, json
 import options
 import sequtils
 
+export messageenums
+
 type InsertTextMode* {.pure.} = enum
   asIs = 1, adjustIndentation
 
@@ -26,7 +28,7 @@ type CompletionItemTag* {.pure.} = enum
   Deprecated = 1
 
 jsonSchema:
-  WorkspaceEditClientCapabilities:
+  "WorkspaceEditClientCapabilities*":
     # The client supports versioned document changes in `WorkspaceEdit`s
     documentChanges ?: bool
 
@@ -42,17 +44,17 @@ jsonSchema:
     # @since 3.13.0
     failureHandling ?: FailureHandlingKind
 
-  DidChangeConfigurationClientCapabilities:
+  "DidChangeConfigurationClientCapabilities*":
     # Did change configuration notification supports dynamic registration.
     dynamicRegistration: bool
 
-  DidChangeWatchedFilesClientCapabilities:
+  "DidChangeWatchedFilesClientCapabilities*":
     # Did change watched files notification supports dynamic registration. Please note
     # that the current protocol doesn't support static configuration for file changes
     # from the server side.
     dynamicRegistration ?: bool
 
-  symbolKindWorkspaceSymbolClientCapabilities:
+  "symbolKindWorkspaceSymbolClientCapabilities*":
     # The symbol kind values the client supports. When this
     # property exists the client also guarantees that it will
     # handle values outside its set gracefully and falls back
@@ -63,18 +65,18 @@ jsonSchema:
     # the initial version of the protocol.
     valueSet ?: SymbolKind[]
 
-  WorkspaceSymbolClientCapabilities:
+  "WorkspaceSymbolClientCapabilities*":
     # Symbol request supports dynamic registration.
     dynamicRegistration ?: bool
 
     # Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
     symbolKind ?: symbolKindWorkspaceSymbolClientCapabilities
 
-  ExecuteCommandClientCapabilities:
+  "ExecuteCommandClientCapabilities*":
     # Execute command supports dynamic registration.
     dynamicRegistration ?: bool
 
-  WorkspaceClientCapabilities:
+  "WorkspaceClientCapabilities*":
     # The client supports applying batch edits
     # to the workspace by supporting the request
     # 'workspace/applyEdit'
@@ -103,13 +105,13 @@ jsonSchema:
     # Since 3.6.0
     configuration ?: bool
 
-  WindowClientCapabilities:
+  "WindowClientCapabilities*":
     # Whether client supports handling progress notifications. If set servers are allowed to
     # report in `workDoneProgress` property in the request specific server capabilities.
     # Since 3.15.0
     workDoneProgress ?: bool
 
-  TextDocumentSyncClientCapabilities:
+  "TextDocumentSyncClientCapabilities*":
     # Whether text document synchronization supports dynamic registration.
     dynamicRegistration ?: bool
 
@@ -124,12 +126,12 @@ jsonSchema:
     # The client supports did save notifications.
     didSave ?: bool
 
-  TagSupportCompletionItemCompletionClientCapabilities:
+  "TagSupportCompletionItemCompletionClientCapabilities*":
     # The tags supported by the client.
     valueSet: CompletionItemTag{int}
     # valueSet: int[]
 
-  CompletionItemKind:
+  "CompletionItemKind*":
     # The completion item kind values the client supports. When this
     # property exists the client also guarantees that it will
     # handle values outside its set gracefully and falls back
@@ -140,7 +142,7 @@ jsonSchema:
     # the initial version of the protocol.
     valueSet ?: CompletionItemKindEnum{int}
 
-  CompletionItemCompletionClientCapabilities:
+  "CompletionItemCompletionClientCapabilities*":
     # Client supports snippets as insert text.
     #
     # A snippet can define tab stops and placeholders with `$1`, `$2`
@@ -172,7 +174,7 @@ jsonSchema:
 
 
 
-  CompletionClientCapabilities:
+  "CompletionClientCapabilities*":
     # Whether completion supports dynamic registration.
     dynamicRegistration ?: bool
 
@@ -185,7 +187,7 @@ jsonSchema:
     contextSupport ?: bool
     insertTextMode ?: InsertTextMode{.int.} #InsertTextMode # since 3.17.0
 
-  HoverClientCapabilities:
+  "HoverClientCapabilities*":
     # Whether hover supports dynamic registration.
     dynamicRegistration ?: bool
 
@@ -198,14 +200,14 @@ jsonSchema:
     # property. The order describes the preferred format of the client.
     documentationFormat ?: MarkupKind{int}
 
-  ParameterInformation:
+  "ParameterInformation*":
     # The client supports processing label offsets instead of a
     # simple label string.
     #
     # @since 3.14.0
     labelOffsetSupport ?: bool
 
-  SignatureHelpClientCapabilities:
+  "SignatureHelpClientCapabilities*":
     # Whether signature help supports dynamic registration.
     dynamicRegistration ?: bool
 
@@ -224,7 +226,7 @@ jsonSchema:
     # @since 3.15.0
     contextSupport ?: bool
 
-  DeclarationClientCapabilities:
+  "DeclarationClientCapabilities*":
     # Whether declaration supports dynamic registration. If this is set to `true`
     # the client supports the new `DeclarationRegistrationOptions` return value
     # for the corresponding server capability as well.
@@ -233,7 +235,7 @@ jsonSchema:
     # The client supports additional metadata in the form of declaration links.
     linkSupport ?: bool
 
-  DefinitionClientCapabilities:
+  "DefinitionClientCapabilities*":
     # Whether definition supports dynamic registration.
     dynamicRegistration ?: bool
 
@@ -242,7 +244,7 @@ jsonSchema:
     # @since 3.14.0
     linkSupport ?: bool
 
-  TypeDefinitionClientCapabilities:
+  "TypeDefinitionClientCapabilities*":
     # Whether implementation supports dynamic registration. If this is set to `true`
     # the client supports the new `TypeDefinitionRegistrationOptions` return value
     # for the corresponding server capability as well.
@@ -253,7 +255,7 @@ jsonSchema:
     # @since 3.14.0
     linkSupport ?: bool
 
-  ImplementationClientCapabilities:
+  "ImplementationClientCapabilities*":
     # Whether implementation supports dynamic registration. If this is set to `true`
     # the client supports the new `ImplementationRegistrationOptions` return value
     # for the corresponding server capability as well.
@@ -264,15 +266,15 @@ jsonSchema:
     # @since 3.14.0
     linkSupport ?: bool
 
-  ReferenceClientCapabilities:
+  "ReferenceClientCapabilities*":
     # Whether references supports dynamic registration.
     dynamicRegistration ?: bool
 
-  DocumentHighlightClientCapabilities:
+  "DocumentHighlightClientCapabilities*":
     # Whether document highlight supports dynamic registration.
     dynamicRegistration ?: bool
 
-  SymbolKindDocumentSymbolClientCapabilities:
+  "SymbolKindDocumentSymbolClientCapabilities*":
     # The symbol kind values the client supports. When this
     # property exists the client also guarantees that it will
     # handle values outside its set gracefully and falls back
@@ -283,7 +285,7 @@ jsonSchema:
     # the initial version of the protocol.
     valueSet ?: SymbolKind[];
 
-  DocumentSymbolClientCapabilities:
+  "DocumentSymbolClientCapabilities*":
     # Whether document symbol supports dynamic registration.
     dynamicRegistration ?: bool
 
@@ -293,7 +295,7 @@ jsonSchema:
     # The client supports hierarchical document symbols.
     hierarchicalDocumentSymbolSupport ?: bool
 
-  CodeActionKind:
+  "CodeActionKind*":
     # The code action kind values the client supports. When this
     # property exists the client also guarantees that it will
     # handle values outside its set gracefully and falls back
@@ -305,7 +307,7 @@ jsonSchema:
     # set.
     #codeActionKind: CodeActionKind
 
-  CodeActionClientCapabilities:
+  "CodeActionClientCapabilities*":
     # Whether code action supports dynamic registration.
     dynamicRegistration ?: bool
 
@@ -319,11 +321,11 @@ jsonSchema:
     # @since 3.15.0
     isPreferredSupport ?: bool
 
-  CodeLensClientCapabilities:
+  "CodeLensClientCapabilities*":
     # Whether code lens supports dynamic registration.
     dynamicRegistration ?: bool
 
-  DocumentLinkClientCapabilities:
+  "DocumentLinkClientCapabilities*":
     # Whether document link supports dynamic registration.
     dynamicRegistration ?: bool
 
@@ -331,23 +333,23 @@ jsonSchema:
     # @since 3.15.0
     tooltipSupport ?: bool
 
-  DocumentColorClientCapabilities:
+  "DocumentColorClientCapabilities*":
     # Whether document color supports dynamic registration.
     dynamicRegistration ?: bool
 
-  DocumentFormattingClientCapabilities:
+  "DocumentFormattingClientCapabilities*":
     # Whether formatting supports dynamic registration.
     dynamicRegistration ?: bool
 
-  DocumentRangeFormattingClientCapabilities:
+  "DocumentRangeFormattingClientCapabilities*":
     # Whether formatting supports dynamic registration.
     dynamicRegistration ?: bool
 
-  DocumentOnTypeFormattingClientCapabilities:
+  "DocumentOnTypeFormattingClientCapabilities*":
     # Whether on type formatting supports dynamic registration.
     dynamicRegistration ?: bool
 
-  RenameClientCapabilities:
+  "RenameClientCapabilities*":
     # Whether rename supports dynamic registration.
     dynamicRegistration ?: bool
 
@@ -357,12 +359,12 @@ jsonSchema:
     # @since version 3.12.0
     prepareSupport ?: bool
 
-  TagSupportPublishDiagnosticsClientCapabilities:
+  "TagSupportPublishDiagnosticsClientCapabilities*":
     # The tags supported by the client.
     # DiagnosticTag 1 or 2
     valueSet: int[]
 
-  PublishDiagnosticsClientCapabilities:
+  "PublishDiagnosticsClientCapabilities*":
     # Whether the clients accepts diagnostics with related information.
     relatedInformation ?: bool
 
@@ -378,7 +380,7 @@ jsonSchema:
     # @since 3.15.0
     versionSupport ?: bool
 
-  FoldingRangeClientCapabilities:
+  "FoldingRangeClientCapabilities*":
     # Whether implementation supports dynamic registration for folding range providers. If this is set to `true`
     # the client supports the new `FoldingRangeRegistrationOptions` return value for the corresponding server
     # capability as well.
@@ -390,13 +392,13 @@ jsonSchema:
     # ignore specified `startCharacter` and `endCharacter` properties in a FoldingRange.
     lineFoldingOnly ?: bool
 
-  SelectionRangeClientCapabilities:
+  "SelectionRangeClientCapabilities*":
     # Whether implementation supports dynamic registration for selection range providers. If this is set to `true`
     # the client supports the new `SelectionRangeRegistrationOptions` return value for the corresponding server
     # capability as well.
     dynamicRegistration ?: bool
 
-  TextDocumentClientCapabilities:
+  "TextDocumentClientCapabilities*":
     synchronization ?: TextDocumentSyncClientCapabilities
 
     # Capabilities specific to the `textDocument/completion` request.
@@ -469,7 +471,7 @@ jsonSchema:
       # @since 3.15.0
     selectionRange ?: SelectionRangeClientCapabilities
 
-  ClientCapabilities:
+  "ClientCapabilities*":
     # Workspace specific client capabilities.
     workspace ?: WorkspaceClientCapabilities
 

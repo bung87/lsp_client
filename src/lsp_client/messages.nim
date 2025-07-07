@@ -4,7 +4,8 @@ import jsonschema
 import json
 import options
 import sequtils
-include ./client_capabilities
+import ./client_capabilities
+export messageenums
 
 type InitializedParams* = JsonNode
 
@@ -16,46 +17,46 @@ type SignatureHelpTriggerKind* = enum
   Invoked = 1, TriggerCharacter, ContentChange
 
 jsonSchema:
-  Message:
+  "Message*":
     jsonrpc: string
 
-  RequestMessage extends Message:
+  "RequestMessage*" extends Message:
     id: int or float or string
     "method": string
     params ?: any[] or any
-  AbstractResponseMessage:
+  "AbstractResponseMessage*":
     id: int or float or string or nil
     error ?: ResponseError
-  ResponseMessage extends Message:
+  "ResponseMessage*" extends Message:
     id: int or float or string or nil
     "result" ?: any
     error ?: ResponseError
 
-  ResponseError:
+  "ResponseError*":
     code: int or float
     message: string
     data: any
 
-  NotificationMessage extends Message:
+  "NotificationMessage*" extends Message:
     "method": string
     params ?: any[] or any
 
-  CancelParams:
+  "CancelParams*":
     id: int or float or string
 
-  Position:
+  "Position*":
     line: int or float
     character: int or float
 
-  Range:
+  "Range*":
     start: Position
     "end": Position
 
-  Location:
+  "Location*":
     uri: string # Note that this is not checked
     "range": Range
 
-  Diagnostic:
+  "Diagnostic*":
     "range": Range
     severity ?: int or float
     code ?: int or float or string
@@ -63,58 +64,58 @@ jsonSchema:
     message: string
     relatedInformation ?: DiagnosticRelatedInformation[]
 
-  DiagnosticRelatedInformation:
+  "DiagnosticRelatedInformation*":
     location: Location
     message: string
 
-  Command:
+  "Command*":
     title: string
     command: string
     arguments ?: any[]
 
-  TextEdit:
+  "TextEdit*":
     "range": Range
     newText: string
 
-  TextDocumentEdit:
+  "TextDocumentEdit*":
     textDocument: VersionedTextDocumentIdentifier
     edits: TextEdit[]
 
-  WorkspaceEdit:
+  "WorkspaceEdit*":
     changes ?: any # This is a uri(string) to TextEdit[] mapping
     documentChanges ?: TextDocumentEdit[]
 
-  TextDocumentIdentifier:
+  "TextDocumentIdentifier*":
     uri: string # Note that this is not checked
 
-  TextDocumentItem:
+  "TextDocumentItem*":
     uri: string
     languageId: string
     version: int or float
     text: string
 
-  VersionedTextDocumentIdentifier extends TextDocumentIdentifier:
+  "VersionedTextDocumentIdentifier*" extends TextDocumentIdentifier:
     version: int or float or nil
     languageId ?: string # SublimeLSP adds this field erroneously
 
-  TextDocumentPositionParams:
+  "TextDocumentPositionParams*":
     textDocument: TextDocumentIdentifier
     position: Position
 
-  DocumentFilter:
+  "DocumentFilter*":
     language ?: string
     scheme ?: string
     pattern ?: string
 
-  MarkupContent:
+  "MarkupContent*":
     kind: string # "plaintext" or "markdown"
     value: string
-  LocationLink:
+  "LocationLink*":
     originSelectionRange ?: Range
     targetUri: DocumentUri
     targetRange: Range
     targetSelectionRange: Range
-  DocumentSymbol:
+  "DocumentSymbol*":
     name: string
     detail ?: string
     kind: SymbolKind
@@ -123,7 +124,7 @@ jsonSchema:
     "range": Range
     selectionRange: Range
     children ?: DocumentSymbol[]
-  InitializeParams:
+  "InitializeParams*":
     processId: int or float or nil
     rootPath ?: string or nil
     rootUri: string or nil # String is DocumentUri
@@ -132,23 +133,23 @@ jsonSchema:
     trace ?: string # 'off' or 'messages' or 'verbose'
     workspaceFolders ?: WorkspaceFolder[] or nil
 
-  WorkspaceEditCapability:
+  "WorkspaceEditCapability*":
     documentChanges ?: bool
 
-  DidChangeConfigurationCapability:
+  "DidChangeConfigurationCapability*":
     dynamicRegistration ?: bool
 
-  DidChangeWatchedFilesCapability:
+  "DidChangeWatchedFilesCapability*":
     dynamicRegistration ?: bool
 
-  SymbolKindCapability:
+  "SymbolKindCapability*":
     valueSet ?: int # SymbolKind enum
 
-  SymbolCapability:
+  "SymbolCapability*":
     dynamicRegistration ?: bool
     symbolKind ?: SymbolKindCapability
 
-  ExecuteCommandCapability:
+  "ExecuteCommandCapability*":
     dynamicRegistration ?: bool
 
   # WorkspaceClientCapabilities:
@@ -161,82 +162,82 @@ jsonSchema:
   #   workspaceFolders ?: bool
   #   configuration ?: bool
 
-  SynchronizationCapability:
+  "SynchronizationCapability*":
     dynamicRegistration ?: bool
     willSave ?: bool
     willSaveWaitUntil ?: bool
     didSave ?: bool
 
-  CompletionItemCapability:
+  "CompletionItemCapability*":
     snippetSupport ?: bool
     commitCharactersSupport ?: bool
     documentFormat ?: string[] # MarkupKind
     deprecatedSupport ?: bool
 
-  CompletionItemKindCapability:
+  "CompletionItemKindCapability*":
     valueSet ?: int[] # CompletionItemKind enum
 
-  CompletionCapability:
+  "CompletionCapability*":
     dynamicRegistration ?: bool
     completionItem ?: CompletionItemCapability
     completionItemKind ?: CompletionItemKindCapability
     contextSupport ?: bool
 
-  HoverCapability:
+  "HoverCapability*":
     dynamicRegistration ?: bool
     contentFormat ?: string[] # MarkupKind
 
-  SignatureInformationCapability:
+  "SignatureInformationCapability*":
     documentationFormat ?: string[] # MarkupKind
 
-  SignatureHelpCapability:
+  "SignatureHelpCapability*":
     dynamicRegistration ?: bool
     signatureInformation ?: SignatureInformationCapability
 
-  ReferencesCapability:
+  "ReferencesCapability*":
     dynamicRegistration ?: bool
 
-  DocumentHighlightCapability:
+  "DocumentHighlightCapability*":
     dynamicRegistration ?: bool
 
-  DocumentSymbolCapability:
+  "DocumentSymbolCapability*":
     dynamicRegistration ?: bool
     symbolKind ?: SymbolKindCapability
 
-  FormattingCapability:
+  "FormattingCapability*":
     dynamicRegistration ?: bool
 
-  RangeFormattingCapability:
+  "RangeFormattingCapability*":
     dynamicRegistration ?: bool
 
-  OnTypeFormattingCapability:
+  "OnTypeFormattingCapability*":
     dynamicRegistration ?: bool
 
-  DefinitionCapability:
+  "DefinitionCapability*":
     dynamicRegistration ?: bool
 
-  TypeDefinitionCapability:
+  "TypeDefinitionCapability*":
     dynamicRegistration ?: bool
 
-  ImplementationCapability:
+  "ImplementationCapability*":
     dynamicRegistration ?: bool
 
-  CodeActionCapability:
+  "CodeActionCapability*":
     dynamicRegistration ?: bool
 
-  CodeLensCapability:
+  "CodeLensCapability*":
     dynamicRegistration ?: bool
 
-  DocumentLinkCapability:
+  "DocumentLinkCapability*":
     dynamicRegistration ?: bool
 
-  ColorProviderCapability:
+  "ColorProviderCapability*":
     dynamicRegistration ?: bool
 
-  RenameCapability:
+  "RenameCapability*":
     dynamicRegistration ?: bool
 
-  PublishDiagnosticsCapability:
+  "PublishDiagnosticsCapability*":
     dynamicRegistration ?: bool
 
   # TextDocumentClientCapabilities:
@@ -265,89 +266,89 @@ jsonSchema:
   #   textDocument ?: TextDocumentClientCapabilities
   #   experimental ?: any
 
-  ServerInfo:
+  "ServerInfo*":
     name: string
     version ?: string
-  WorkspaceFolder:
+  "WorkspaceFolder*":
     uri: string
     name: string
 
-  InitializeResult:
+  "InitializeResult*":
     capabilities: ServerCapabilities
     serverInfo ?: ServerInfo
   # responses
-  InitializeResponse extends AbstractResponseMessage:
+  "InitializeResponse*" extends AbstractResponseMessage:
     "result" ?: InitializeResult or nil
 
-  DocumentSymbolResponse extends AbstractResponseMessage:
+  "DocumentSymbolResponse*" extends AbstractResponseMessage:
     "result" ?: DocumentSymbol[] or SymbolInformation[] or nil
-  DefinitionResponse extends AbstractResponseMessage:
+  "DefinitionResponse*" extends AbstractResponseMessage:
     "result" ?: Location or Location[] or LocationLink[] or nil
-  TypeDefinitionResponse extends AbstractResponseMessage:
+  "TypeDefinitionResponse*" extends AbstractResponseMessage:
     "result" ?: Location or Location[] or LocationLink[] or nil
-  SignatureHelpResponse extends AbstractResponseMessage:
+  "SignatureHelpResponse*" extends AbstractResponseMessage:
     "result" ?: SignatureHelp or nil
-  CompletionResponse extends AbstractResponseMessage:
+  "CompletionResponse*" extends AbstractResponseMessage:
     "result" ?: CompletionItem[] or CompletionList or nil
-  DeclarationResponse extends AbstractResponseMessage:
+  "DeclarationResponse*" extends AbstractResponseMessage:
     "result" ?: Location or Location[] or LocationLink[] or nil
-  RenameResponse extends AbstractResponseMessage:
+  "RenameResponse*" extends AbstractResponseMessage:
     "result" ?: WorkspaceEdit or nil
-  HoverResponse extends AbstractResponseMessage:
+  "HoverResponse*" extends AbstractResponseMessage:
     "result" ?: Hover or nil
-  InitializeError:
+  "InitializeError*":
     retry: bool
 
-  CompletionOptions:
+  "CompletionOptions*":
     resolveProvider ?: bool
     triggerCharacters ?: string[]
 
-  SignatureHelpOptions:
+  "SignatureHelpOptions*":
     triggerCharacters ?: string[]
 
-  CodeLensOptions:
+  "CodeLensOptions*":
     resolveProvider ?: bool
 
-  DocumentOnTypeFormattingOptions:
+  "DocumentOnTypeFormattingOptions*":
     firstTriggerCharacter: string
     moreTriggerCharacter ?: string[]
 
-  DocumentLinkOptions:
+  "DocumentLinkOptions*":
     resolveProvider ?: bool
 
-  ExecuteCommandOptions:
+  "ExecuteCommandOptions*":
     commands: string[]
 
-  SaveOptions:
+  "SaveOptions*":
     includeText ?: bool
 
-  ColorProviderOptions:
+  "ColorProviderOptions*":
     DUMMY ?: nil # This is actually an empty object
 
-  TextDocumentSyncOptions:
+  "TextDocumentSyncOptions*":
     openClose ?: bool
     change ?: int or float
     willSave ?: bool
     willSaveWaitUntil ?: bool
     save ?: SaveOptions
 
-  StaticRegistrationOptions:
+  "StaticRegistrationOptions*":
     id ?: string
 
-  WorkspaceFolderCapability:
+  "WorkspaceFolderCapability*":
     supported ?: bool
     changeNotifications ?: string or bool
 
-  WorkspaceCapability:
+  "WorkspaceCapability*":
     workspaceFolders ?: WorkspaceFolderCapability
 
-  TextDocumentRegistrationOptions:
+  "TextDocumentRegistrationOptions*":
     documentSelector: DocumentFilter[] or nil
 
-  TextDocumentAndStaticRegistrationOptions extends TextDocumentRegistrationOptions:
+  "TextDocumentAndStaticRegistrationOptions*" extends TextDocumentRegistrationOptions:
     id ?: string
 
-  ServerCapabilities:
+  "ServerCapabilities*":
     textDocumentSync ?: TextDocumentSyncOptions or int or float
     hoverProvider ?: bool
     completionProvider ?: CompletionOptions
@@ -374,131 +375,131 @@ jsonSchema:
   # InitializedParams:
   #   DUMMY ?: nil # This is actually an empty object
 
-  ShowMessageParams:
+  "ShowMessageParams*":
     "type": int # MessageType
     message: string
 
-  MessageActionItem:
+  "MessageActionItem*":
     title: string
 
-  ShowMessageRequestParams:
+  "ShowMessageRequestParams*":
     "type": int # MessageType
     message: string
     actions ?: MessageActionItem[]
 
-  LogMessageParams:
+  "LogMessageParams*":
     "type": int # MessageType
     message: string
 
-  Registration:
+  "Registration*":
     id: string
     "method": string
     registrationOptions ?: any
 
-  RegistrationParams:
+  "RegistrationParams*":
     registrations: Registration[]
 
-  Unregistration:
+  "Unregistration*":
     id: string
     "method": string
 
-  UnregistrationParams:
+  "UnregistrationParams*":
     unregistrations: Unregistration[]
 
-  WorkspaceFoldersChangeEvent:
+  "WorkspaceFoldersChangeEvent*":
     added: WorkspaceFolder[]
     removed: WorkspaceFolder[]
 
-  DidChangeWorkspaceFoldersParams:
+  "DidChangeWorkspaceFoldersParams*":
     event: WorkspaceFoldersChangeEvent
 
-  DidChangeConfigurationParams:
+  "DidChangeConfigurationParams*":
     settings: any
 
-  ConfigurationParams:
+  "ConfigurationParams*":
     "items": ConfigurationItem[]
 
-  ConfigurationItem:
+  "ConfigurationItem*":
     scopeUri ?: string
     section ?: string
 
-  FileEvent:
+  "FileEvent*":
     uri: string # DocumentUri
     "type": int # FileChangeType
 
-  DidChangeWatchedFilesParams:
+  "DidChangeWatchedFilesParams*":
     changes: FileEvent[]
 
-  DidChangeWatchedFilesRegistrationOptions:
+  "DidChangeWatchedFilesRegistrationOptions*":
     watchers: FileSystemWatcher[]
 
-  FileSystemWatcher:
+  "FileSystemWatcher*":
     globPattern: string
     kind ?: int # WatchKindCreate (bitmap)
 
-  WorkspaceSymbolParams:
+  "WorkspaceSymbolParams*":
     query: string
 
-  ExecuteCommandParams:
+  "ExecuteCommandParams*":
     command: string
     arguments ?: any[]
 
-  ExecuteCommandRegistrationOptions:
+  "ExecuteCommandRegistrationOptions*":
     commands: string[]
 
-  ApplyWorkspaceEditParams:
+  "ApplyWorkspaceEditParams*":
     label ?: string
     edit: WorkspaceEdit
 
-  ApplyWorkspaceEditResponse:
+  "ApplyWorkspaceEditResponse*":
     applied: bool
 
-  DidOpenTextDocumentParams:
+  "DidOpenTextDocumentParams*":
     textDocument: TextDocumentItem
 
-  DidChangeTextDocumentParams:
+  "DidChangeTextDocumentParams*":
     textDocument: VersionedTextDocumentIdentifier
     contentChanges: TextDocumentContentChangeEvent[]
 
-  TextDocumentContentChangeEvent:
+  "TextDocumentContentChangeEvent*":
     range ?: Range
     rangeLength ?: int or float
     text: string
 
-  TextDocumentChangeRegistrationOptions extends TextDocumentRegistrationOptions:
+  "TextDocumentChangeRegistrationOptions*" extends TextDocumentRegistrationOptions:
     syncKind: int or float
 
-  WillSaveTextDocumentParams:
+  "WillSaveTextDocumentParams*":
     textDocument: TextDocumentIdentifier
     reason: int # TextDocumentSaveReason
 
-  DidSaveTextDocumentParams:
+  "DidSaveTextDocumentParams*":
     textDocument: TextDocumentIdentifier
     text ?: string
 
-  TextDocumentSaveRegistrationOptions extends TextDocumentRegistrationOptions:
+  "TextDocumentSaveRegistrationOptions*" extends TextDocumentRegistrationOptions:
     includeText ?: bool
 
-  DidCloseTextDocumentParams:
+  "DidCloseTextDocumentParams*":
     textDocument: TextDocumentIdentifier
 
-  PublishDiagnosticsParams:
+  "PublishDiagnosticsParams*":
     uri: string # DocumentUri
     diagnostics: Diagnostic[]
 
-  CompletionParams extends TextDocumentPositionParams:
+  "CompletionParams*" extends TextDocumentPositionParams:
     workDoneToken ?: string or int #ProgressToken
     context ?: CompletionContext
 
-  CompletionContext:
+  "CompletionContext*":
     triggerKind: int # CompletionTriggerKind
     triggerCharacter ?: string
 
-  CompletionList:
+  "CompletionList*":
     isIncomplete: bool
     "items": CompletionItem[]
 
-  CompletionItem:
+  "CompletionItem*":
     label: string
     kind ?: int # CompletionItemKind
     detail ?: string
@@ -515,24 +516,24 @@ jsonSchema:
     command ?: Command
     data ?: any
 
-  CompletionRegistrationOptions extends TextDocumentRegistrationOptions:
+  "CompletionRegistrationOptions*" extends TextDocumentRegistrationOptions:
     triggerCharacters ?: string[]
     resolveProvider ?: bool
 
-  MarkedStringOption:
+  "MarkedStringOption*":
     language: string
     value: string
 
-  Hover:
+  "Hover*":
     contents: string or MarkedStringOption or string[] or MarkedStringOption[] or MarkupContent
     range ?: Range
 
-  SignatureHelp:
+  "SignatureHelp*":
     signatures: SignatureInformation[]
     activeSignature ?: int or float
     activeParameter ?: int or float
 
-  SignatureInformation:
+  "SignatureInformation*":
     label: string
     documentation ?: string or MarkupContent
     parameters ?: ParameterInformation[]
@@ -541,109 +542,109 @@ jsonSchema:
   #   label: string
   #   documentation ?: string or MarkupContent
 
-  SignatureHelpRegistrationOptions extends TextDocumentRegistrationOptions:
+  "SignatureHelpRegistrationOptions*" extends TextDocumentRegistrationOptions:
     triggerCharacters ?: string[]
 
-  ReferenceParams extends TextDocumentPositionParams:
+  "ReferenceParams*" extends TextDocumentPositionParams:
     context: ReferenceContext
 
-  ReferenceContext:
+  "ReferenceContext*":
     includeDeclaration: bool
 
-  DocumentHighlight:
+  "DocumentHighlight*":
     "range": Range
     kind ?: int # DocumentHighlightKind
 
-  DocumentSymbolParams:
+  "DocumentSymbolParams*":
     textDocument: TextDocumentIdentifier
     workDoneToken ?: int or string # ProgressToken
     partialResultToken ?: int or string # ProgressToken
-  DefinitionParams:
-    textDocument: TextDocumentIdentifier
-    position: Position
-    workDoneToken ?: int or string # ProgressToken
-    partialResultToken ?: int or string # ProgressToken
-  TypeDefinitionParams: # since 3.6.0
+  "DefinitionParams*":
     textDocument: TextDocumentIdentifier
     position: Position
     workDoneToken ?: int or string # ProgressToken
     partialResultToken ?: int or string # ProgressToken
-  SignatureHelpContext: # since 3.15.0
+  "TypeDefinitionParams*": # since 3.6.0
+    textDocument: TextDocumentIdentifier
+    position: Position
+    workDoneToken ?: int or string # ProgressToken
+    partialResultToken ?: int or string # ProgressToken
+  "SignatureHelpContext*": # since 3.15.0
     triggerKind: SignatureHelpTriggerKind
     triggerCharacter ?: string
     isRetrigger: bool
     activeSignatureHelp ?: SignatureHelp
-  SignatureHelpParams:
+  "SignatureHelpParams*":
     textDocument: TextDocumentIdentifier
     position: Position
     workDoneToken ?: int or string # ProgressToken
     context ?: SignatureHelpContext # since 3.15
-  DeclarationParams:
+  "DeclarationParams*":
     textDocument: TextDocumentIdentifier
     position: Position
     workDoneToken ?: int or string # ProgressToken
     partialResultToken ?: int or string # ProgressToken
-  SymbolInformation:
+  "SymbolInformation*":
     name: string
     kind: int # SymbolKind
     deprecated ?: bool
     location: Location
     containerName ?: string
 
-  CodeActionParams:
+  "CodeActionParams*":
     textDocument: TextDocumentIdentifier
     "range": Range
     context: CodeActionContext
 
-  CodeActionContext:
+  "CodeActionContext*":
     diagnostics: Diagnostic[]
 
-  CodeLensParams:
+  "CodeLensParams*":
     textDocument: TextDocumentIdentifier
 
-  CodeLens:
+  "CodeLens*":
     "range": Range
     command ?: Command
     data ?: any
 
-  CodeLensRegistrationOptions extends TextDocumentRegistrationOptions:
+  "CodeLensRegistrationOptions*" extends TextDocumentRegistrationOptions:
     resolveProvider ?: bool
 
-  DocumentLinkParams:
+  "DocumentLinkParams*":
     textDocument: TextDocumentIdentifier
 
-  DocumentLink:
+  "DocumentLink*":
     "range": Range
     target ?: string # DocumentUri
     data ?: any
 
-  DocumentLinkRegistrationOptions extends TextDocumentRegistrationOptions:
+  "DocumentLinkRegistrationOptions*" extends TextDocumentRegistrationOptions:
     resolveProvider ?: bool
 
-  DocumentColorParams:
+  "DocumentColorParams*":
     textDocument: TextDocumentIdentifier
 
-  ColorInformation:
+  "ColorInformation*":
     "range": Range
     color: Color
 
-  Color:
+  "Color*":
     red: int or float
     green: int or float
     blue: int or float
     alpha: int or float
 
-  ColorPresentationParams:
+  "ColorPresentationParams*":
     textDocument: TextDocumentIdentifier
     color: Color
     "range": Range
 
-  ColorPresentation:
+  "ColorPresentation*":
     label: string
     textEdit ?: TextEdit
     additionalTextEdits ?: TextEdit[]
 
-  DocumentFormattingParams:
+  "DocumentFormattingParams*":
     textDocument: TextDocumentIdentifier
     options: any # FormattingOptions
 
@@ -652,33 +653,33 @@ jsonSchema:
   #  insertSpaces: bool
   #  [key: string]: boolean | int or float | string (jsonschema doesn't support variable key objects)
 
-  DocumentRangeFormattingParams:
+  "DocumentRangeFormattingParams*":
     textDocument: TextDocumentIdentifier
     "range": Range
     options: any # FormattingOptions
 
-  DocumentOnTypeFormattingParams:
+  "DocumentOnTypeFormattingParams*":
     textDocument: TextDocumentIdentifier
     position: Position
     ch: string
     options: any # FormattingOptions
 
-  DocumentOnTypeFormattingRegistrationOptions extends TextDocumentRegistrationOptions:
+  "DocumentOnTypeFormattingRegistrationOptions*" extends TextDocumentRegistrationOptions:
     firstTriggerCharacter: string
     moreTriggerCharacter ?: string[]
 
-  RenameParams:
+  "RenameParams*":
     textDocument: TextDocumentIdentifier
     position: Position
     newName: string
     workDoneToken ?: int or string #ProgressToken
 
-  HoverParams:
+  "HoverParams*":
     textDocument: TextDocumentIdentifier
     position: Position
     workDoneToken ?: int or string #ProgressToken
 
-  WorkDoneProgressParams:
+  "WorkDoneProgressParams*":
     workDoneToken ?: int or string #ProgressToken
-  PartialResultParams:
+  "PartialResultParams*":
     partialResultToken ?: int or string #ProgressToken

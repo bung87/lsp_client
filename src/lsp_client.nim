@@ -1,9 +1,13 @@
 import lsp_client/lsp_types
-include lsp_client/messages
+import lsp_client/messages
+import lsp_client/client_capabilities
 import options
 import json
 import chronos
 
+export lsp_types
+export messages
+export client_capabilities
 # type TraceValue = enum
 #   off="off",messages="messages",verbose="verbose"
 type TraceValue* = string

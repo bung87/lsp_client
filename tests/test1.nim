@@ -1,9 +1,9 @@
 import lsp_client
 import lsp_client / nim_lsp_endpoint
-import jsonschema
+import lsp_client/jsonschema
 import os
 import chronos
-include moe_doc_caps
+import moe_doc_caps
 
 jsonSchema:
   ClientInfo:
@@ -15,7 +15,7 @@ let client = newLspClient(endPoint)
 
 let caps = create(ClientCapabilities,
         workspace = none(WorkspaceClientCapabilities),
-        textDocument = some(docCaps),
+        textDocument = some(createDocCaps()),
         window = none(WindowClientCapabilities),
         experimental = none(JsonNode))
 
