@@ -38,6 +38,17 @@ let symbolResp = waitFor client.documentSymbol(textDocument = TextDocumentIdenti
     currentSourcePath))
 
 echo symbolResp.JsonNode
+
+# Test hover functionality
+echo "Testing hover..."
+let hoverResp = waitFor client.hover(
+  textDocument = TextDocumentIdentifier.create(uri = uri),
+  position = Position.create(line = 12, character = 15), # Hover at "LspNimEndpoint" (0-indexed)
+  workDoneToken = none(string)
+)
+echo "Hover response:"
+echo hoverResp.JsonNode
+
 waitFor client.didClose(TextDocumentIdentifier.create(uri = uri))
 
 let resp2 = waitFor client.shutdown()

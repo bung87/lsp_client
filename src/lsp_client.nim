@@ -225,12 +225,12 @@ proc declaration*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, p
 
 proc rename*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position, newName: string,
     workDoneToken = none(string)): Future[RenameResponse]{.async.} =
-  let resp = self.lspEndpoint.callMethod("textDocument/rename", RenameParams.create(textDocument = textDocument,
+  let resp = await self.lspEndpoint.callMethod("textDocument/rename", RenameParams.create(textDocument = textDocument,
       position = position, newName = newName, workDoneToken = workDoneToken))
   return RenameResponse(resp.parseJson())
 
 proc hover*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position,
     workDoneToken = none(string)): Future[HoverResponse]{.async.} =
-  let resp = self.lspEndpoint.callMethod("textDocument/hover", HoverParams.create(textDocument = textDocument,
+  let resp = await self.lspEndpoint.callMethod("textDocument/hover", HoverParams.create(textDocument = textDocument,
       position = position, workDoneToken = workDoneToken))
   return HoverResponse(resp.parseJson())
