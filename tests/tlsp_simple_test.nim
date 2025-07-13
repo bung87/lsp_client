@@ -180,7 +180,7 @@ proc runSimpleLspTest() {.async.} =
     )
     
     await client.didChange(
-      textDocument = VersionedTextDocumentIdentifier.create(uri = mainUri, version = 2, languageId = some("nim")),
+      textDocument = VersionedTextDocumentIdentifier.create(uri = mainUri, version = 2),
       contentChanges = @[change]
     )
     echo "   ✓ Document change notification sent"

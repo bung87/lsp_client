@@ -36,13 +36,13 @@ jsonSchema:
     # support 'create', 'rename' and 'delete' files and folders.
     #
     # @since 3.13.0
-    resourceOperations ?: ResourceOperationKind[]
+    resourceOperations ?: ResourceOperationKind{.int.}
 
     # The failure handling strategy of a client if applying the workspace edit
     # fails.
     #
     # @since 3.13.0
-    failureHandling ?: FailureHandlingKind
+    failureHandling ?: FailureHandlingKind{.int.}
 
   "DidChangeConfigurationClientCapabilities*":
     # Did change configuration notification supports dynamic registration.
@@ -54,7 +54,7 @@ jsonSchema:
     # from the server side.
     dynamicRegistration ?: bool
 
-  "symbolKindWorkspaceSymbolClientCapabilities*":
+  "SymbolKindWorkspaceSymbolClientCapabilities*":
     # The symbol kind values the client supports. When this
     # property exists the client also guarantees that it will
     # handle values outside its set gracefully and falls back
@@ -63,14 +63,14 @@ jsonSchema:
     # If this property is not present the client only supports
     # the symbol kinds from `File` to `Array` as defined in
     # the initial version of the protocol.
-    valueSet ?: SymbolKind[]
+    valueSet ?: SymbolKind{int}
 
   "WorkspaceSymbolClientCapabilities*":
     # Symbol request supports dynamic registration.
     dynamicRegistration ?: bool
 
     # Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
-    symbolKind ?: symbolKindWorkspaceSymbolClientCapabilities
+    symbolKind ?: SymbolKindWorkspaceSymbolClientCapabilities
 
   "ExecuteCommandClientCapabilities*":
     # Execute command supports dynamic registration.
@@ -156,7 +156,7 @@ jsonSchema:
 
     # Client supports the follow content formats for the documentation
     # property. The order describes the preferred format of the client.
-    documentationFormat ?: MarkupKind{int}
+    documentationFormat ?: MarkupKind{.int.}
 
       # Client supports the deprecated property on a completion item.
     deprecatedSupport ?: bool
@@ -193,12 +193,12 @@ jsonSchema:
 
     # Client supports the follow content formats for the content
     # property. The order describes the preferred format of the client.
-    contentFormat ?: MarkupKind{int}
+    contentFormat ?: MarkupKind{.int.}
 
   #SignatureInformation:
     # Client supports the follow content formats for the documentation
     # property. The order describes the preferred format of the client.
-    documentationFormat ?: MarkupKind{int}
+    documentationFormat ?: MarkupKind{.int.}
 
   "ParameterInformation*":
     # The client supports processing label offsets instead of a
@@ -283,7 +283,7 @@ jsonSchema:
     # If this property is not present the client only supports
     # the symbol kinds from `File` to `Array` as defined in
     # the initial version of the protocol.
-    valueSet ?: SymbolKind[];
+    valueSet ?: SymbolKind{int}
 
   "DocumentSymbolClientCapabilities*":
     # Whether document symbol supports dynamic registration.

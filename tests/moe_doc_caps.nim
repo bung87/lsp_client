@@ -15,22 +15,22 @@ proc createDocCaps*(): TextDocumentClientCapabilities =
     )),
     hover = some(HoverClientCapabilities.create(
       dynamicRegistration = some(true),
-      contentFormat = some(DocumentationFormat),
-      documentationFormat = some(DocumentationFormat)
+      contentFormat = some(MarkupKind.markdown),
+      documentationFormat = some(MarkupKind.markdown)
     )),
     completion = some(create(CompletionClientCapabilities,
       dynamicRegistration = some(true),
       completionItem = some(CompletionItemCompletionClientCapabilities.create(
         snippetSupport = none(bool),
         commitCharactersSupport = none(bool),
-      documentationFormat = some(DocumentationFormat),
-      deprecatedSupport = some(true),
-      preselectSupport = none(bool),
-      tagSupport = some(TagSupportCompletionItemCompletionClientCapabilities.create(
-        valueSet = TagSupportValueSet
-      ))
+        documentationFormat = some(MarkupKind.markdown),
+        deprecatedSupport = some(true),
+        preselectSupport = none(bool),
+        tagSupport = some(TagSupportCompletionItemCompletionClientCapabilities.create(
+          valueSet = TagSupportValueSet
+        ))
 
-    )),
+      )),
       completionItemKind = some(CompletionItemKind.create(
         valueSet = some({low(CompletionItemKindEnum) .. high(CompletionItemKindEnum)}.toSeq)
       )),

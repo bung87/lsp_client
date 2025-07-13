@@ -111,13 +111,13 @@ jsonSchema:
     value: string
   "LocationLink*":
     originSelectionRange ?: Range
-    targetUri: DocumentUri
+    targetUri: string
     targetRange: Range
     targetSelectionRange: Range
   "DocumentSymbol*":
     name: string
     detail ?: string
-    kind: SymbolKind
+    kind: SymbolKind{.int.}
     tags ?: SymbolTag{int}
     deprecated ?: bool
     "range": Range
@@ -491,7 +491,7 @@ jsonSchema:
     context ?: CompletionContext
 
   "CompletionContext*":
-    triggerKind: int # CompletionTriggerKind
+    triggerKind: int # CompletionTriggerKind{.int.}
     triggerCharacter ?: string
 
   "CompletionList*":
@@ -569,7 +569,7 @@ jsonSchema:
     workDoneToken ?: int or string # ProgressToken
     partialResultToken ?: int or string # ProgressToken
   "SignatureHelpContext*": # since 3.15.0
-    triggerKind: SignatureHelpTriggerKind
+    triggerKind: SignatureHelpTriggerKind{.int.}
     triggerCharacter ?: string
     isRetrigger: bool
     activeSignatureHelp ?: SignatureHelp
