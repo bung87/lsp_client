@@ -96,7 +96,6 @@ jsonSchema:
 
   "VersionedTextDocumentIdentifier*" extends TextDocumentIdentifier:
     version: int or float or nil
-    languageId ?: string # SublimeLSP adds this field erroneously
 
   "TextDocumentPositionParams*":
     textDocument: TextDocumentIdentifier
