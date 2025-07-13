@@ -52,7 +52,7 @@ proc initialize*[E, T, P](self: LspClient[E], processId: P, rootPath: Option[str
     ]#
   await self.lspEndpoint.startProcess()
 
-  let resp = await self.lspEndpoint.callMethod("initialize", InitializeParams.create(processId = processId,
+  let resp = await self.lspEndpoint.callMethod("initialize", createInitializeParams(processId = processId,
       rootPath = rootPath, rootUri = rootUri, initializationOptions = cast[Option[json.JsonNode]](
           initializationOptions), capabilities = capabilities, trace = trace,
       workspaceFolders = workspaceFolders))
@@ -104,15 +104,15 @@ proc didOpen*[E](self: LspClient[E], textDocument: TextDocumentItem): Future[voi
   handles the new language id as well.
   :param TextDocumentItem textDocument: The document that was opened.
   ]#
-  await self.lspEndpoint.sendNotification("textDocument/didOpen", DidOpenTextDocumentParams.create(
+  await self.lspEndpoint.sendNotification("textDocument/didOpen", createDidOpenTextDocumentParams(
       textDocument = textDocument))
 
 proc didClose*[E](self: LspClient[E], textDocument: TextDocumentIdentifier): Future[void]{.async.} =
-  await self.lspEndpoint.sendNotification("textDocument/didClose", DidCloseTextDocumentParams.create(
+  await self.lspEndpoint.sendNotification("textDocument/didClose", createDidCloseTextDocumentParams(
       textDocument = textDocument))
 
 proc didSave*[E](self: LspClient[E], textDocument: VersionedTextDocumentIdentifier): Future[void]{.async.} =
-  await self.lspEndpoint.sendNotification("textDocument/didSave", DidCloseTextDocumentParams.create(
+  await self.lspEndpoint.sendNotification("textDocument/didSave", createDidSaveTextDocumentParams(
       textDocument = textDocument))
 
 proc didChange*[E](self: LspClient[E], textDocument: VersionedTextDocumentIdentifier, contentChanges: seq[
@@ -126,7 +126,7 @@ proc didChange*[E](self: LspClient[E], textDocument: VersionedTextDocumentIdenti
     to the document. So if there are two content changes c1 and c2 for a document in state S then c1 move the document
     to S' and c2 to S''.
   ]#
-  await self.lspEndpoint.sendNotification("textDocument/didChange", DidChangeTextDocumentParams.create(
+  await self.lspEndpoint.sendNotification("textDocument/didChange", createDidChangeTextDocumentParams(
       textDocument = textDocument, contentChanges = contentChanges))
 
 
@@ -140,7 +140,7 @@ proc documentSymbol*[E](self: LspClient[E], textDocument: TextDocumentIdentifier
   :result DocumentSymbol[] | SymbolInformation[] | null
   ]#
 
-  let resp = await self.lspEndpoint.callMethod("textDocument/documentSymbol", DocumentSymbolParams.create(
+  let resp = await self.lspEndpoint.callMethod("textDocument/documentSymbol", createDocumentSymbolParams(
       textDocument = textDocument, workDoneToken = workDoneToken, partialResultToken = partialResultToken))
   return DocumentSymbolResponse(resp.parseJson)
 
@@ -157,7 +157,7 @@ proc definition*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, po
     error: code and message set in case an exception happens during the definition request
   ]#
   # TextDocumentPositionParams,WorkDoneProgressParams,PartialResultParams
-  let resp = await self.lspEndpoint.callMethod("textDocument/definition", DefinitionParams.create(
+  let resp = await self.lspEndpoint.callMethod("textDocument/definition", createDefinitionParams(
       textDocument = textDocument, position = position, workDoneToken = workDoneToken,
       partialResultToken = partialResultToken))
   return DefinitionResponse(resp.parseJson)
@@ -172,7 +172,7 @@ proc typeDefinition*[E](self: LspClient[E], textDocument: TextDocumentIdentifier
   :param TextDocumentIdentifier textDocument: The text document.
   :param Position position: The position inside the text document.
   ]#
-  let resp = await self.lspEndpoint.callMethod("textDocument/typeDefinition", TypeDefinitionParams.create(
+  let resp = await self.lspEndpoint.callMethod("textDocument/typeDefinition", createTypeDefinitionParams(
       textDocument = textDocument, position = position, workDoneToken = workDoneToken,
       partialResultToken = partialResultToken))
   return TypeDefinitionResponse(resp.parseJson)
@@ -186,7 +186,7 @@ proc signatureHelp*[E](self: LspClient[E], textDocument: TextDocumentIdentifier,
   :param TextDocumentIdentifier textDocument: The text document.
   :param Position position: The position inside the text document.
   ]#
-  let resp = await self.lspEndpoint.callMethod("textDocument/signatureHelp", SignatureHelpParams.create(
+  let resp = await self.lspEndpoint.callMethod("textDocument/signatureHelp", createSignatureHelpParams(
       textDocument = textDocument, position = position, workDoneToken = workDoneToken, context = context))
   return SignatureHelpResponse(resp.parseJson)
 
@@ -202,7 +202,7 @@ proc completion*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, po
     to send this using `ClientCapabilities.textDocument.completion.contextSupport === true`
   :result CompletionItem[] | CompletionList | null
   ]#
-  let resp = await self.lspEndpoint.callMethod("textDocument/completion", CompletionParams.create(
+  let resp = await self.lspEndpoint.callMethod("textDocument/completion", createCompletionParams(
       textDocument = textDocument, position = position, workDoneToken = workDoneToken, context = context))
   return CompletionResponse(resp.parseJson())
 
@@ -218,19 +218,19 @@ proc declaration*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, p
   :param TextDocumentItem textDocument: The text document.
   :param Position position: The position inside the text document.
   ]#
-  let resp = await self.lspEndpoint.callMethod("textDocument/declaration", DeclarationParams.create(
+  let resp = await self.lspEndpoint.callMethod("textDocument/declaration", createDeclarationParams(
       textDocument = textDocument, position = position, workDoneToken = workDoneToken,
       partialResultToken = partialResultToken))
   return DeclarationResponse(resp.parseJson())
 
 proc rename*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position, newName: string,
     workDoneToken = none(string)): Future[RenameResponse]{.async.} =
-  let resp = await self.lspEndpoint.callMethod("textDocument/rename", RenameParams.create(textDocument = textDocument,
+  let resp = await self.lspEndpoint.callMethod("textDocument/rename", createRenameParams(textDocument = textDocument,
       position = position, newName = newName, workDoneToken = workDoneToken))
   return RenameResponse(resp.parseJson())
 
 proc hover*[E](self: LspClient[E], textDocument: TextDocumentIdentifier, position: Position,
     workDoneToken = none(string)): Future[HoverResponse]{.async.} =
-  let resp = await self.lspEndpoint.callMethod("textDocument/hover", HoverParams.create(textDocument = textDocument,
+  let resp = await self.lspEndpoint.callMethod("textDocument/hover", createHoverParams(textDocument = textDocument,
       position = position, workDoneToken = workDoneToken))
   return HoverResponse(resp.parseJson())
