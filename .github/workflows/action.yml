@@ -35,7 +35,7 @@ jobs:
             #   - devel
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Cache choosenim
       id: cache-choosenim
@@ -46,7 +46,7 @@ jobs:
 
     - name: Cache nimble
       id: cache-nimble
-      uses: actions/cache@v1
+      uses: actions/cache@v4
       with:
         path: ~/.nimble
         key: ${{ runner.os }}-nimble-${{ matrix.nim-version}}-${{ hashFiles('*.nimble') }}
@@ -58,7 +58,6 @@ jobs:
 
     - name: Install Packages
       run: nimble install -d -y
-    - name: Install slim
-      run: nimble install slim -y
+
     - name: Test
-      run: slim --silent test 
+      run: nimble --silent test 

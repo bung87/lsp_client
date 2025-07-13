@@ -36,7 +36,7 @@ jsonSchema:
     # support 'create', 'rename' and 'delete' files and folders.
     #
     # @since 3.13.0
-    resourceOperations ?: ResourceOperationKind{.int.}
+    resourceOperations ?: ResourceOperationKind{int}
 
     # The failure handling strategy of a client if applying the workspace edit
     # fails.
@@ -156,7 +156,7 @@ jsonSchema:
 
     # Client supports the follow content formats for the documentation
     # property. The order describes the preferred format of the client.
-    documentationFormat ?: MarkupKind{.int.}
+    documentationFormat ?: MarkupKind{int}
 
       # Client supports the deprecated property on a completion item.
     deprecatedSupport ?: bool
@@ -193,12 +193,12 @@ jsonSchema:
 
     # Client supports the follow content formats for the content
     # property. The order describes the preferred format of the client.
-    contentFormat ?: MarkupKind{.int.}
+    contentFormat ?: MarkupKind{int}
 
   #SignatureInformation:
     # Client supports the follow content formats for the documentation
     # property. The order describes the preferred format of the client.
-    documentationFormat ?: MarkupKind{.int.}
+    documentationFormat ?: MarkupKind{int}
 
   "ParameterInformation*":
     # The client supports processing label offsets instead of a
