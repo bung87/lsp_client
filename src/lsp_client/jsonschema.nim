@@ -456,12 +456,15 @@ macro jsonSchema*(pattern: untyped): untyped =
         `traverse` = true, `allowExtra` = false): bool {.used.}
   var accessors = newStmtList()
   var creators = newStmtList()
+  var shortcuts = newStmtList()
   for t in types:
     let
       creatorBody = creatorBodies[t.name]
       kindIdent = newIdentNode(t.name)
       kindName = t.name
       finalCreate = if t.exported: nnkPostfix.newTree(newIdentNode("*"), newIdentNode("create")) else: newIdentNode("create")
+      shortcutName = newIdentNode("create" & t.name)
+      finalShortcutName = if t.exported: nnkPostfix.newTree(newIdentNode("*"), shortcutName) else: shortcutName
     var creatorArgs = createArgs[t.name]
     creatorArgs.insert(1, nnkIdentDefs.newTree(
       schemaType,
@@ -482,6 +485,34 @@ macro jsonSchema*(pattern: untyped): untyped =
       proc `finalCreate`() {.used.}
     forwardCreateProc[3] = creatorArgs
     forwardDecls.add forwardCreateProc
+    
+    # Create shortcut procedure
+    var shortcutArgs = newNimNode(nnkFormalParams)
+    shortcutArgs.add(createArgs[t.name][0]) # Add return type
+    # Skip the schemaType parameter (index 1) and add the rest
+    for i in 2..<createArgs[t.name].len:
+      shortcutArgs.add(createArgs[t.name][i])
+    
+    # Build the argument list for the create call
+    var createCallArgs = newNimNode(nnkCall)
+    createCallArgs.add(newIdentNode("create"))
+    createCallArgs.add(kindIdent)
+    # Add the parameter names as arguments
+    for i in 2..<createArgs[t.name].len:
+      let paramDef = createArgs[t.name][i]
+      if paramDef.kind == nnkIdentDefs and paramDef.len >= 1:
+        let paramName = paramDef[0]
+        createCallArgs.add(paramName)
+    
+    var shortcutProc = quote do:
+      proc `finalShortcutName`() {.used.} =
+        `createCallArgs`
+    shortcutProc[3] = shortcutArgs
+    shortcuts.add shortcutProc
+    var forwardShortcutProc = quote do:
+      proc `finalShortcutName`() {.used.}
+    forwardShortcutProc[3] = shortcutArgs
+    forwardDecls.add forwardShortcutProc
 
     let macroName = nnkAccQuoted.newTree(
       newIdentNode("[]")
@@ -539,6 +570,7 @@ macro jsonSchema*(pattern: untyped): untyped =
     `forwardDecls`
     `validators`
     `creators`
+    `shortcuts`
     `accessors`
 
   when defined(jsonSchemaDebug):
@@ -569,17 +601,23 @@ when isMainModule:
       "if": bool
       "type": float
 
+  echo "before wcp"
   var wcp = create(WrapsCancelParams,
     create(CancelParams, some(10), none(float)), "Hello"
   )
-  echo wcp.JsonNode.isValid(WrapsCancelParams) == true
-  cast[var JsonNode](wcp["cp"]) = %*{"notcancelparams": true}
-  echo wcp.JsonNode.isValid(WrapsCancelParams) == false
-  echo wcp.JsonNode.isValid(WrapsCancelParams, false) == true
+  echo "after wcp: ", wcp.JsonNode.isValid(WrapsCancelParams)
+  echo "before mutation"
+  var wcpNode = wcp.JsonNode
+  wcpNode["cp"] = %*{"notcancelparams": true}
+  echo "after mutation: ", wcpNode.isValid(WrapsCancelParams)
+  echo "before allowExtra"
+  echo wcpNode.isValid(WrapsCancelParams, false) == true
+  echo "before ecp"
   var ecp = create(ExtendsCancelParams, some(10), some(5.3), "Hello")
-  echo ecp.JsonNode.isValid(ExtendsCancelParams) == true
+  echo "after ecp: ", ecp.JsonNode.isValid(ExtendsCancelParams)
+  echo "before war"
   var war = create(WithArrayAndAny, some(@[
     create(CancelParams, some(10), some(1.0)),
     create(CancelParams, some("hello"), none(float))
   ]), 2.0, %*{"hello": "world"}, none(NilType))
-  echo war.JsonNode.isValid(WithArrayAndAny) == true
+  echo "after war: ", war.JsonNode.isValid(WithArrayAndAny)
